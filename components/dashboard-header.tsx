@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useAuth } from '@/contexts/auth-context'
 
 interface DashboardHeaderProps {
   setSidebarOpen: (open: boolean) => void
@@ -22,9 +23,15 @@ interface DashboardHeaderProps {
 export default function DashboardHeader({ setSidebarOpen }: DashboardHeaderProps) {
   const { theme, setTheme } = useTheme()
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const { userEmail, logout } = useAuth()
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark')
+  }
+
+  const handleLogout = () => {
+    logout()
+    setShowUserMenu(false)
   }
 
   return (
@@ -84,15 +91,20 @@ export default function DashboardHeader({ setSidebarOpen }: DashboardHeaderProps
             <div className="absolute right-0 mt-2 w-48 bg-background border rounded-lg shadow-lg z-50">
               <div className="p-2">
                 <div className="px-3 py-2 border-b">
-                  <p className="text-sm font-medium">John Doe</p>
-                  <p className="text-xs text-muted-foreground">john@company.com</p>
+                  <p className="text-sm font-medium">Welcome!</p>
+                  <p className="text-xs text-muted-foreground">{userEmail}</p>
                 </div>
                 <div className="p-1">
                   <Button variant="ghost" size="sm" className="w-full justify-start">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Button>
-                  <Button variant="ghost" size="sm" className="w-full justify-start text-red-600 hover:text-red-700">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-red-600 hover:text-red-700"
+                    onClick={handleLogout}
+                  >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign out
                   </Button>

@@ -2,11 +2,13 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Brain, Mail, Lock, User, Eye, EyeOff } from 'lucide-react'
+import { Brain, Mail, Lock, User, Eye, EyeOff, CheckCircle } from 'lucide-react'
+import { useAuth } from '@/contexts/auth-context'
 
 interface AuthFormProps {
   mode: 'login' | 'signup'
@@ -15,18 +17,51 @@ interface AuthFormProps {
 export default function AuthForm({ mode }: AuthFormProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { login } = useAuth()
 
   const isLogin = mode === 'login'
+
+  useEffect(() => {
+    const message = searchParams.get('message')
+    if (message) {
+      setSuccessMessage(message)
+      // Clear the message from URL after showing it
+      const url = new URL(window.location.href)
+      url.searchParams.delete('message')
+      window.history.replaceState({}, '', url.toString())
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // For demo purposes, we'll always redirect to dashboard
+      // In a real app, you'd validate credentials here
+      if (isLogin) {
+        const email = (e.target as any).email.value
+        // Use auth context to login
+        login(email)
+        
+        // Redirect to dashboard
+        router.push('/dashboard')
+      } else {
+        // For signup, redirect to login with success message
+        router.push('/login?message=Account created successfully! Please sign in.')
+      }
+    } catch (error) {
+      console.error('Authentication error:', error)
+      // Handle error (show toast, etc.)
+    } finally {
       setIsLoading(false)
-      // Redirect to dashboard or show success message
-    }, 1000)
+    }
   }
 
   return (
@@ -55,6 +90,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
         </CardHeader>
         
         <CardContent>
+          {successMessage && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-sm text-green-700">{successMessage}</span>
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div className="space-y-2">
