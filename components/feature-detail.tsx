@@ -192,16 +192,52 @@ export default function FeatureDetail() {
                   </Button>
                 </div>
 
-                {/* Screenshot Placeholder */}
+                {/* Screenshot */}
                 <div className={isEven ? '' : 'lg:col-start-1'}>
                   <div className="relative rounded-2xl bg-gradient-to-br from-navy-50 to-teal-50 dark:from-navy-900 dark:to-teal-900 p-8 border">
-                    <div className="aspect-video bg-white/10 rounded-lg flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-4xl mb-2">📱</div>
-                        <div className="text-sm text-muted-foreground">
-                          {feature.screenshot} Preview
-                        </div>
-                      </div>
+                    <div className="aspect-video rounded-lg overflow-hidden">
+                      {feature.screenshot === 'transcription-preview' && (
+                        <img 
+                          src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1926&q=80" 
+                          alt="Real-time transcription interface"
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                      {feature.screenshot === 'speaker-tracking-preview' && (
+                        <img 
+                          src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                          alt="Team meeting with speaker tracking"
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                      {feature.screenshot === 'emotion-analysis-preview' && (
+                        <img 
+                          src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2088&q=80" 
+                          alt="AI emotion analysis dashboard"
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                      {feature.screenshot === 'jargon-assistant-preview' && (
+                        <img 
+                          src="https://images.unsplash.com/photo-1516110833967-0b5716ca1387?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80" 
+                          alt="Technical documentation and definitions"
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                      {feature.screenshot === 'summaries-preview' && (
+                        <img 
+                          src="https://images.unsplash.com/photo-1542626991-cbc4e32524cc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80" 
+                          alt="Document summaries and insights"
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                      {feature.screenshot === 'automation-preview' && (
+                        <img 
+                          src="https://images.unsplash.com/photo-1518186285589-2f7649de83e0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80" 
+                          alt="Workflow automation interface"
+                          className="w-full h-full object-cover"
+                        />
+                      )}
                     </div>
                     
                     {/* Floating Elements */}
