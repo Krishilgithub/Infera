@@ -22,11 +22,13 @@ Transform your meetings with AI-powered transcription, emotion tracking, and aut
 ## Getting Started
 
 1. **Install dependencies**:
+
    ```bash
    npm install
    ```
 
 2. **Run the development server**:
+
    ```bash
    npm run dev
    ```
@@ -57,6 +59,7 @@ Transform your meetings with AI-powered transcription, emotion tracking, and aut
 ## Pages Overview
 
 ### Public Pages
+
 - **Home**: Hero section, product highlights, how it works, testimonials
 - **Features**: Detailed feature descriptions with screenshots
 - **Pricing**: Tiered pricing plans with comparison table
@@ -65,6 +68,7 @@ Transform your meetings with AI-powered transcription, emotion tracking, and aut
 - **Login/Signup**: Authentication forms
 
 ### Dashboard Pages
+
 - **Overview**: KPI cards, recent meetings, AI insights
 - **Meeting Screen**: Live meeting interface with WebRTC placeholders
 - **History**: Past meetings with search and filtering
@@ -93,9 +97,55 @@ Transform your meetings with AI-powered transcription, emotion tracking, and aut
 ## Testing
 
 Run the test suite:
+
 ```bash
 npm test
 ```
+
+## 🚀 Deployment on Vercel
+
+This project is optimized for Vercel deployment with built-in analytics and performance monitoring.
+
+### Automatic Deployment
+
+1. **Connect to Vercel**:
+
+   - Push your code to GitHub
+   - Import your repository in [Vercel Dashboard](https://vercel.com/dashboard)
+   - Vercel will automatically detect Next.js and configure the deployment
+
+2. **Environment Variables**:
+   Set the following environment variables in your Vercel project settings:
+   ```
+   VERCEL_ANALYTICS_ID=your_analytics_id
+   NODE_ENV=production
+   ```
+
+### Manual Deployment
+
+1. **Install Vercel CLI**:
+
+```bash
+npm install -g vercel
+```
+
+2. **Deploy**:
+
+```bash
+# Preview deployment
+npm run deploy:preview
+
+# Production deployment
+npm run deploy
+```
+
+### Analytics & Monitoring
+
+The project includes:
+
+- **Vercel Analytics**: Track page views and user interactions
+- **Speed Insights**: Monitor Core Web Vitals and performance
+- **Bundle Analysis**: Use `npm run analyze` to analyze bundle size
 
 ## Building for Production
 

@@ -1,0 +1,11 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+
+# Host
+Host: https://infera.vercel.app
+
+# Sitemaps
+Sitemap: https://infera.vercel.app/sitemap.xml

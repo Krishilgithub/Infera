@@ -1,0 +1,25 @@
+{
+	"name": "Infera - AI-Powered Meeting Intelligence",
+	"short_name": "Infera",
+	"description": "Transform your meetings with AI-powered transcription, emotion tracking, and automated summaries.",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#ffffff",
+	"theme_color": "#000000",
+	"orientation": "portrait-primary",
+	"icons": [
+		{
+			"src": "/icon-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png"
+		},
+		{
+			"src": "/icon-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png"
+		}
+	],
+	"categories": ["productivity", "business", "utilities"],
+	"lang": "en",
+	"dir": "ltr"
+}
