@@ -1,1 +1,14 @@
-{}
+{
+  "/_not-found": "app/_not-found.js",
+  "/features/page": "app/features/page.js",
+  "/login/page": "app/login/page.js",
+  "/api/health/route": "app/api/health/route.js",
+  "/integrations/page": "app/integrations/page.js",
+  "/page": "app/page.js",
+  "/demo/page": "app/demo/page.js",
+  "/pricing/page": "app/pricing/page.js",
+  "/signup/page": "app/signup/page.js",
+  "/dashboard/meeting/page": "app/dashboard/meeting/page.js",
+  "/dashboard/history/page": "app/dashboard/history/page.js",
+  "/dashboard/page": "app/dashboard/page.js"
+}
