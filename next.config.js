@@ -7,7 +7,7 @@ const nextConfig = {
 	// Optimize for production
 	compress: true,
 	poweredByHeader: false,
-	// Enable static exports if needed
+	// Enable standalone output for Docker/Render
 	output: "standalone",
 	// Headers for security
 	async headers() {
@@ -27,9 +27,17 @@ const nextConfig = {
 						key: "Referrer-Policy",
 						value: "origin-when-cross-origin",
 					},
+					{
+						key: "X-XSS-Protection",
+						value: "1; mode=block",
+					},
 				],
 			},
 		];
+	},
+	// Optimize for Render deployment
+	experimental: {
+		outputFileTracingRoot: undefined,
 	},
 };
 
