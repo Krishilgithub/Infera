@@ -21,11 +21,11 @@ export default function DashboardLayout({
 		const checkScreenSize = () => {
 			setSidebarOpen(window.innerWidth >= 1024); // lg breakpoint
 		};
-		
+
 		checkScreenSize();
-		window.addEventListener('resize', checkScreenSize);
-		
-		return () => window.removeEventListener('resize', checkScreenSize);
+		window.addEventListener("resize", checkScreenSize);
+
+		return () => window.removeEventListener("resize", checkScreenSize);
 	}, []);
 
 	useEffect(() => {
@@ -52,9 +52,9 @@ export default function DashboardLayout({
 		<MeetingProvider>
 			<div className="min-h-screen gradient-bg">
 				<DashboardSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-				<div 
+				<div
 					className={`min-h-screen transition-all duration-300 ${
-						sidebarOpen ? 'lg:ml-64' : 'ml-0'
+						sidebarOpen ? "lg:ml-64" : "ml-0"
 					}`}
 				>
 					<DashboardHeader setSidebarOpen={setSidebarOpen} />
