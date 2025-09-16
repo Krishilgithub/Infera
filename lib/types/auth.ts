@@ -1,6 +1,6 @@
 import { User } from '@supabase/supabase-js'
 
-export interface AuthUser extends User {
+export type AuthUser = User & {
   user_metadata?: {
     full_name?: string
     avatar_url?: string

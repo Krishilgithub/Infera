@@ -24,7 +24,36 @@ import { useRouter } from "next/navigation";
 
 export default function ProfileInterface() {
 	const [isEditing, setIsEditing] = useState(false);
-	const [profileData, setProfileData] = useState({
+	
+	type ProfileData = {
+		name: string;
+		email: string;
+		phone: string;
+		location: string;
+		bio: string;
+		role: string;
+		department: string;
+		joinDate: string;
+		timezone: string;
+		language: string;
+		preferences: {
+			theme: string;
+			language: string;
+			timezone: string;
+		};
+		privacy: {
+			profileVisible: boolean;
+			emailVisible: boolean;
+			phoneVisible: boolean;
+		};
+		notifications: {
+			email: boolean;
+			push: boolean;
+			sms: boolean;
+		};
+	};
+	
+	const [profileData, setProfileData] = useState<ProfileData>({
 		name: "John Doe",
 		email: "john.doe@example.com",
 		phone: "+1 (555) 123-4567",
@@ -35,6 +64,16 @@ export default function ProfileInterface() {
 		bio: "Experienced product manager with a passion for building great user experiences and leading cross-functional teams.",
 		timezone: "Pacific Standard Time",
 		language: "English",
+		preferences: {
+			theme: "light",
+			language: "English",
+			timezone: "Pacific Standard Time",
+		},
+		privacy: {
+			profileVisible: true,
+			emailVisible: false,
+			phoneVisible: false,
+		},
 		notifications: {
 			email: true,
 			push: true,
@@ -42,7 +81,7 @@ export default function ProfileInterface() {
 		},
 	});
 
-	const { userEmail, logout } = useAuth();
+	const { user, signOut } = useAuth();
 	const router = useRouter();
 
 	const handleSave = () => {
