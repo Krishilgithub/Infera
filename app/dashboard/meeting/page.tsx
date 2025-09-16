@@ -1,5 +1,5 @@
-import MeetingDetails from '@/components/meeting-details'
+import MeetingJoinInterface from '@/components/meeting-join-interface'
 
 export default function MeetingPage() {
-  return <MeetingDetails />
+  return <MeetingJoinInterface />
 }
