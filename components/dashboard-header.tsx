@@ -1,18 +1,13 @@
 "use client"
 
-import { useState } from 'react'
-import { 
-  Menu, 
-  Bell, 
-  User,
-  Settings,
-  LogOut
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { useAuth } from '@/contexts/auth-context'
+import { useState } from "react";
+import { Menu, Bell, User, Settings, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/auth-context";
+import Link from "next/link";
 
 interface DashboardHeaderProps {
-  setSidebarOpen: (open: boolean) => void
+	setSidebarOpen: (open: boolean) => void;
 }
 
 export default function DashboardHeader({ setSidebarOpen }: DashboardHeaderProps) {
@@ -24,27 +19,33 @@ export default function DashboardHeader({ setSidebarOpen }: DashboardHeaderProps
     setShowUserMenu(false)
   }
 
-  return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 sm:px-6 lg:px-8">
-      {/* Left side */}
-      <div className="flex items-center space-x-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="lg:hidden"
-          onClick={() => setSidebarOpen(true)}
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-      </div>
+	return (
+		<header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/20 bg-white/95 backdrop-blur-md px-4 sm:px-6 lg:px-8 shadow-sm">
+			{/* Left side */}
+			<div className="flex items-center space-x-4">
+				<Button
+					variant="ghost"
+					size="icon"
+					onClick={() => setSidebarOpen(true)}
+				>
+					<Menu className="h-5 w-5" />
+				</Button>
+			</div>
 
-      {/* Right side */}
-      <div className="flex items-center space-x-4">
-        {/* Notifications */}
-        <Button variant="ghost" size="icon" aria-label="Notifications" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">2</span>
-        </Button>
+			{/* Right side */}
+			<div className="flex items-center space-x-4">
+				{/* Notifications */}
+				<Button
+					variant="ghost"
+					size="icon"
+					aria-label="Notifications"
+					className="relative"
+				>
+					<Bell className="h-5 w-5" />
+					<span className="absolute -top-1 -right-1 h-4 w-4 bg-gradient-to-r from-navy-500 to-teal-500 text-white text-xs rounded-full flex items-center justify-center">
+						2
+					</span>
+				</Button>
 
         {/* User menu */}
         <div className="relative">
