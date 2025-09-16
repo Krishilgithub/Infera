@@ -12,27 +12,27 @@ export default function DashboardLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	const [sidebarOpen, setSidebarOpen] = useState(false);
-	const { isAuthenticated, loading } = useAuth();
-	const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { user, loading } = useAuth()
+  const router = useRouter()
 
-	// Set sidebar open by default on large screens
-	useEffect(() => {
-		const checkScreenSize = () => {
-			setSidebarOpen(window.innerWidth >= 1024); // lg breakpoint
-		};
+  // Set sidebar open by default on large screens and keep in sync on resize
+  useEffect(() => {
+    const checkScreenSize = () => {
+      if (typeof window !== 'undefined') {
+        setSidebarOpen(window.innerWidth >= 1024)
+      }
+    }
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
 
-		checkScreenSize();
-		window.addEventListener("resize", checkScreenSize);
-
-		return () => window.removeEventListener("resize", checkScreenSize);
-	}, []);
-
-	useEffect(() => {
-		if (!loading && !isAuthenticated) {
-			router.push("/login");
-		}
-	}, [isAuthenticated, loading, router]);
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login')
+    }
+  }, [user, loading, router])
 
 	// Show loading spinner while checking auth
 	if (loading) {
@@ -43,10 +43,10 @@ export default function DashboardLayout({
 		);
 	}
 
-	// Don't render dashboard if not authenticated
-	if (!isAuthenticated) {
-		return null;
-	}
+  // Don't render dashboard if not authenticated
+  if (!user) {
+    return null
+  }
 
 	return (
 		<MeetingProvider>

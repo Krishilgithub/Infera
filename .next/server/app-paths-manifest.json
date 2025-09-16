@@ -1,7 +1,14 @@
 {
+<<<<<<< HEAD
   "/page": "app/page.js",
   "/login/page": "app/login/page.js",
   "/dashboard/meeting/page": "app/dashboard/meeting/page.js",
   "/dashboard/page": "app/dashboard/page.js",
   "/dashboard/live/page": "app/dashboard/live/page.js"
+=======
+  "/login/page": "app/login/page.js",
+  "/signup/page": "app/signup/page.js",
+  "/page": "app/page.js",
+  "/dashboard/page": "app/dashboard/page.js"
+>>>>>>> c5022923893c8cc70aaf7f8b9c578a7564677854
 }

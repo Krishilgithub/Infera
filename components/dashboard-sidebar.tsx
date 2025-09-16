@@ -1,21 +1,23 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-	LayoutDashboard,
-	Video,
-	History,
-	Settings,
-	Users,
-	BarChart3,
-	Zap,
-	X,
-	Brain,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from 'framer-motion'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { 
+  LayoutDashboard, 
+  Video, 
+  History, 
+  Settings, 
+  Users, 
+  BarChart3,
+  Zap,
+  X,
+  Brain
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { useAuth } from '@/contexts/auth-context'
+import { useRouter } from 'next/navigation'
 
 interface DashboardSidebarProps {
 	isOpen: boolean;
@@ -23,21 +25,22 @@ interface DashboardSidebarProps {
 }
 
 const navigation = [
-	{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-	{ name: "Live Meeting", href: "/dashboard/live", icon: Video, isLive: true },
-	{ name: "Join Meeting", href: "/dashboard/meeting", icon: Video },
-	{ name: "Schedule Meeting", href: "/dashboard/schedule", icon: BarChart3 },
-	{ name: "Meeting History", href: "/dashboard/history", icon: History },
-	{ name: "Profile", href: "/dashboard/profile", icon: Users },
-	{ name: "Settings", href: "/dashboard/settings", icon: Settings },
-	{ name: "Help & Support", href: "/dashboard/help", icon: Brain },
-];
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Live Meeting', href: '/dashboard/live', icon: Video, isLive: true },
+  { name: 'Meeting Details', href: '/dashboard/meeting', icon: History },
+  { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+  { name: 'Help', href: '/dashboard/help', icon: Brain },
+]
 
-export default function DashboardSidebar({
-	isOpen,
-	setIsOpen,
-}: DashboardSidebarProps) {
-	const pathname = usePathname();
+export default function DashboardSidebar({ isOpen, setIsOpen }: DashboardSidebarProps) {
+  const pathname = usePathname()
+  const { user, signOut } = useAuth()
+  const router = useRouter()
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push('/login')
+  }
 
 	return (
 		<>
@@ -113,22 +116,33 @@ export default function DashboardSidebar({
 						})}
 					</nav>
 
-					{/* User section */}
-					<div className="border-t border-white/20 p-4">
-						<div className="flex items-center space-x-3">
-							<div className="h-8 w-8 rounded-full bg-gradient-to-br from-navy-600 to-teal-600 flex items-center justify-center">
-								<span className="text-sm font-medium text-white">JD</span>
-							</div>
-							<div className="flex-1 min-w-0">
-								<p className="text-sm font-medium text-gray-900">John Doe</p>
-								<p className="text-xs text-gray-600 truncate">
-									john@company.com
-								</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</motion.div>
-		</>
-	);
+          {/* User section */}
+          <div className="border-t border-gray-200 p-4">
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
+                <span className="text-sm font-medium text-white">
+                  {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900">
+                  {user?.user_metadata?.full_name || 'User'}
+                </p>
+                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={handleSignOut}
+            >
+              <Users className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
+        </div>
+      </motion.div>
+    </>
+  )
 }

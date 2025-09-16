@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Brain, Mail, Lock, User, Eye, EyeOff, CheckCircle } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
+import { useToast } from '@/hooks/use-toast'
 
 interface AuthFormProps {
   mode: 'login' | 'signup'
@@ -20,7 +21,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [successMessage, setSuccessMessage] = useState('')
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { login } = useAuth()
+  const { signIn, signUp } = useAuth()
+  const { toast } = useToast()
 
   const isLogin = mode === 'login'
 
@@ -40,25 +42,51 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setIsLoading(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const formData = new FormData(e.target as HTMLFormElement)
+      const email = formData.get('email') as string
+      const password = formData.get('password') as string
       
-      // For demo purposes, we'll always redirect to dashboard
-      // In a real app, you'd validate credentials here
       if (isLogin) {
-        const email = (e.target as any).email.value
-        // Use auth context to login
-        login(email)
+        const { error } = await signIn(email, password)
         
-        // Redirect to dashboard
-        router.push('/dashboard')
+        if (error) {
+          toast({
+            title: "Sign In Failed",
+            description: error.message,
+            variant: "destructive",
+          })
+        } else {
+          toast({
+            title: "Welcome back!",
+            description: "You've been signed in successfully.",
+          })
+          // Redirect will happen automatically via auth state change
+        }
       } else {
-        // For signup, redirect to login with success message
-        router.push('/login?message=Account created successfully! Please sign in.')
+        const fullName = formData.get('name') as string
+        const { error } = await signUp(email, password, fullName)
+        
+        if (error) {
+          toast({
+            title: "Sign Up Failed",
+            description: error.message,
+            variant: "destructive",
+          })
+        } else {
+          toast({
+            title: "Account Created!",
+            description: "Please check your email to verify your account.",
+          })
+          router.push('/login?message=Account created successfully! Please check your email to verify your account.')
+        }
       }
     } catch (error) {
       console.error('Authentication error:', error)
-      // Handle error (show toast, etc.)
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later.",
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -107,6 +135,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="name"
+                    name="name"
                     type="text"
                     placeholder="John Doe"
                     className="pl-10"
@@ -124,6 +153,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="john@company.com"
                   className="pl-10"
@@ -140,6 +170,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
+                  name="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
                   className="pl-10 pr-10"
