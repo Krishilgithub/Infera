@@ -1,5 +1,5 @@
-import MeetingJoinInterface from '@/components/meeting-join-interface'
+import LiveMeetingInterface from '@/components/live-meeting-interface'
 
 export default function MeetingPage() {
-  return <MeetingJoinInterface />
+  return <LiveMeetingInterface />
 }

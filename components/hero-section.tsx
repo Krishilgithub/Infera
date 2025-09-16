@@ -80,9 +80,19 @@ export default function HeroSection() {
               <div className="space-y-6">
                 {/* Video Grid Placeholder */}
                 <div className="grid grid-cols-2 gap-4">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="aspect-video bg-gradient-to-br from-navy-400 to-teal-400 rounded-lg flex items-center justify-center">
-                      <span className="text-white font-medium">Participant {i}</span>
+                  {[
+                    { name: "Sarah", gradient: "from-purple-500 to-pink-600", avatar: "👩‍💼" },
+                    { name: "Mike", gradient: "from-blue-500 to-cyan-600", avatar: "👨‍💻" },
+                    { name: "Emma", gradient: "from-green-500 to-emerald-600", avatar: "👩‍🎨" },
+                    { name: "Alex", gradient: "from-orange-500 to-red-600", avatar: "👨‍🔬" }
+                  ].map((participant, i) => (
+                    <div key={i} className={`aspect-video bg-gradient-to-br ${participant.gradient} rounded-lg flex items-center justify-center relative overflow-hidden`}>
+                      <div className="text-4xl mb-2">{participant.avatar}</div>
+                      <div className="absolute bottom-2 left-2 right-2">
+                        <div className="bg-black/40 backdrop-blur-sm rounded px-2 py-1">
+                          <span className="text-white text-xs font-medium">{participant.name}</span>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -120,7 +130,7 @@ export default function HeroSection() {
               <motion.div
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="absolute -top-4 -right-4 bg-gradient-to-r from-teal-500 to-navy-500 rounded-full p-3 shadow-lg"
+                className="absolute -top-4 -right-4 bg-gradient-to-r from-violet-500 to-purple-600 rounded-full p-3 shadow-lg"
               >
                 <Sparkles className="h-6 w-6 text-white" />
               </motion.div>
@@ -128,7 +138,7 @@ export default function HeroSection() {
               <motion.div
                 animate={{ y: [0, 10, 0] }}
                 transition={{ duration: 3, repeat: Infinity }}
-                className="absolute -bottom-4 -left-4 bg-gradient-to-r from-navy-500 to-teal-500 rounded-full p-2 shadow-lg"
+                className="absolute -bottom-4 -left-4 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full p-2 shadow-lg"
               >
                 <div className="h-4 w-4 bg-white rounded-full"></div>
               </motion.div>
