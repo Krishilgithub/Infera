@@ -13,12 +13,13 @@ This guide walks you through deploying your Infera application to Render.
 Before deploying, you'll need to set up these environment variables in Render:
 
 ### Required Variables
+
 ```bash
 # Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-# App Configuration  
+# App Configuration
 NEXT_PUBLIC_SITE_URL=https://your-app-name.onrender.com
 NEXT_PUBLIC_APP_NAME=Infera
 

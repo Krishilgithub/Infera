@@ -24,7 +24,7 @@ import { useRouter } from "next/navigation";
 
 export default function ProfileInterface() {
 	const [isEditing, setIsEditing] = useState(false);
-	
+
 	type ProfileData = {
 		name: string;
 		email: string;
@@ -52,7 +52,7 @@ export default function ProfileInterface() {
 			sms: boolean;
 		};
 	};
-	
+
 	const [profileData, setProfileData] = useState<ProfileData>({
 		name: "John Doe",
 		email: "john.doe@example.com",
