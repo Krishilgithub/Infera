@@ -58,7 +58,7 @@ export default function DashboardLayout({
 					}`}
 				>
 					<DashboardHeader setSidebarOpen={setSidebarOpen} />
-					<main className="pt-4 pb-8">{children}</main>
+					<main className="pt-4 pb-8 px-6 lg:px-12">{children}</main>
 				</div>
 			</div>
 		</MeetingProvider>

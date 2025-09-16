@@ -26,8 +26,8 @@ interface DashboardSidebarProps {
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Live Meeting', href: '/dashboard/live', icon: Video, isLive: true },
-  { name: 'Meeting Details', href: '/dashboard/meeting', icon: History },
+  { name: 'Live Meeting', href: '/dashboard/meeting', icon: Video, isLive: true },
+  { name: 'Meeting Details', href: '/dashboard/meeting-details', icon: History },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   { name: 'Help', href: '/dashboard/help', icon: Brain },
 ]
@@ -51,6 +51,7 @@ export default function DashboardSidebar({ isOpen, setIsOpen }: DashboardSidebar
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
+						transition={{ duration: 0.1 }}
 						className="fixed inset-0 z-40 bg-black/50"
 						onClick={() => setIsOpen(false)}
 					/>
@@ -61,9 +62,9 @@ export default function DashboardSidebar({ isOpen, setIsOpen }: DashboardSidebar
 			<motion.div
 				initial={{ x: -300 }}
 				animate={{ x: isOpen ? 0 : -300 }}
-				transition={{ type: "spring", damping: 20, stiffness: 300 }}
+				transition={{ type: "spring", damping: 30, stiffness: 800, duration: 0.15 }}
 				className={cn(
-					"fixed inset-y-0 left-0 z-50 w-64 bg-white/95 backdrop-blur-md border-r border-white/20 shadow-xl transform transition-transform duration-300 ease-in-out",
+					"fixed inset-y-0 left-0 z-50 w-64 bg-white/95 backdrop-blur-md border-r border-white/20 shadow-xl transform transition-transform duration-150 ease-out",
 					isOpen ? "translate-x-0" : "-translate-x-full"
 				)}
 			>
