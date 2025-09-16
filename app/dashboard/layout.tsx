@@ -12,14 +12,14 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { isAuthenticated, loading } = useAuth()
+  const { user, loading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
+    if (!loading && !user) {
       router.push('/login')
     }
-  }, [isAuthenticated, loading, router])
+  }, [user, loading, router])
 
   // Show loading spinner while checking auth
   if (loading) {
@@ -31,7 +31,7 @@ export default function DashboardLayout({
   }
 
   // Don't render dashboard if not authenticated
-  if (!isAuthenticated) {
+  if (!user) {
     return null
   }
 

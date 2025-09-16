@@ -16,6 +16,8 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/contexts/auth-context'
+import { useRouter } from 'next/navigation'
 
 interface DashboardSidebarProps {
   isOpen: boolean
@@ -28,11 +30,17 @@ const navigation = [
   { name: 'Meeting Details', href: '/dashboard/meeting', icon: History },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   { name: 'Help', href: '/dashboard/help', icon: Brain },
-  { name: 'Sign Out', href: '/logout', icon: Users },
 ]
 
 export default function DashboardSidebar({ isOpen, setIsOpen }: DashboardSidebarProps) {
   const pathname = usePathname()
+  const { user, signOut } = useAuth()
+  const router = useRouter()
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push('/login')
+  }
 
   return (
     <>
@@ -111,15 +119,28 @@ export default function DashboardSidebar({ isOpen, setIsOpen }: DashboardSidebar
 
           {/* User section */}
           <div className="border-t border-gray-200 p-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 mb-3">
               <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
-                <span className="text-sm font-medium text-white">JD</span>
+                <span className="text-sm font-medium text-white">
+                  {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900">John Doe</p>
-                <p className="text-xs text-gray-500 truncate">john@company.com</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {user?.user_metadata?.full_name || 'User'}
+                </p>
+                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
               </div>
             </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={handleSignOut}
+            >
+              <Users className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
           </div>
         </div>
       </motion.div>
