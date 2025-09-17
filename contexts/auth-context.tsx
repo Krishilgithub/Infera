@@ -30,9 +30,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null)
         setLoading(false)
         
-        // Only redirect on sign out, let OAuth callback handle sign in redirects
+        // Handle different auth events
         if (event === 'SIGNED_OUT') {
           router.push('/login')
+        } else if (event === 'SIGNED_IN' && session?.user) {
+          // Only redirect to dashboard if we're not already on a protected route
+          const currentPath = window.location.pathname
+          if (currentPath === '/login' || currentPath === '/signup' || currentPath === '/') {
+            // Small delay to ensure session is fully established
+            setTimeout(() => {
+              router.push('/dashboard')
+            }, 100)
+          }
         }
       }
     )
