@@ -557,16 +557,16 @@ const MeetingDetailsInterface: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       <div className="pb-16 lg:pb-0">
         <MeetingHeader />
 
         <div className="max-w-7xl mx-auto p-6">
-          <div className="flex bg-muted rounded-lg p-1 mb-6">
+          <div className="flex bg-white border border-gray-200 rounded-lg p-1 mb-6 shadow-sm">
             <button
               onClick={() => setSelectedTab('transcript')}
               className={'flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 ' + (
-                selectedTab === 'transcript' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                selectedTab === 'transcript' ? 'bg-gray-100 text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               )}
             >
               Transcript & Timeline
@@ -574,31 +574,37 @@ const MeetingDetailsInterface: React.FC = () => {
             <button
               onClick={() => setSelectedTab('sentiment')}
               className={'flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 ' + (
-                selectedTab === 'sentiment' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                selectedTab === 'sentiment' ? 'bg-gray-100 text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               )}
             >
               Sentiment Analysis
             </button>
             <button
-              onClick={() => setSelectedTab('integrations')}
+              onClick={() => setSelectedTab('actionItems')}
               className={'flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 ' + (
-                selectedTab === 'integrations' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                selectedTab === 'actionItems' ? 'bg-gray-100 text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               )}
             >
-              Integrations
+              Action Items
             </button>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 h-[calc(100vh-400px)]">
-            <div className="xl:col-span-3">
-              {selectedTab === 'transcript' && <TranscriptPanel />}
-              {selectedTab === 'sentiment' && <SentimentAnalysis />}
-              {selectedTab === 'integrations' && <IntegrationStatus />}
-            </div>
-
-            <div className="xl:col-span-1">
-              <ActionItemsSidebar />
-            </div>
+          <div className="space-y-6">
+            {selectedTab === 'transcript' && (
+              <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+                <TranscriptPanel />
+              </div>
+            )}
+            {selectedTab === 'sentiment' && (
+              <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+                <SentimentAnalysis />
+              </div>
+            )}
+            {selectedTab === 'actionItems' && (
+              <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+                <ActionItemsSidebar />
+              </div>
+            )}
           </div>
         </div>
       </div>

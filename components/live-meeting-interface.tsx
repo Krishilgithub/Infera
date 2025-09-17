@@ -40,6 +40,7 @@ const LiveMeetingInterface: React.FC = () => {
 	const [meetingStatus, setMeetingStatus] = useState("live");
 	const [meetingDuration, setMeetingDuration] = useState("00:15:32");
 	const [showSummaryModal, setShowSummaryModal] = useState(false);
+	const [selectedRightPanel, setSelectedRightPanel] = useState("transcript"); // transcript, sentiment, actionItems
 
 	// Update meeting duration every second
 	useEffect(() => {
@@ -139,7 +140,7 @@ const LiveMeetingInterface: React.FC = () => {
 	);
 
 	const VideoGrid = () => (
-		<Card className="h-full border-infera-200 bg-gradient-to-br from-infera-50/50 to-rose-50/50">
+		<Card className="h-full border-gray-200 bg-white shadow-lg">
 			<CardContent className="p-6 h-full">
 				<div className="grid grid-cols-2 lg:grid-cols-3 gap-6 h-full">
 					{[
@@ -147,36 +148,36 @@ const LiveMeetingInterface: React.FC = () => {
 							name: "Sarah Johnson",
 							role: "Product Manager",
 							isHost: true,
-							bgColor: "bg-infera-100",
-							borderColor: "border-infera-200",
+							bgColor: "bg-gray-50",
+							borderColor: "border-gray-200",
 						},
 						{
 							name: "Michael Chen",
 							role: "Engineering Lead",
 							isHost: false,
-							bgColor: "bg-rose-100",
-							borderColor: "border-rose-200",
+							bgColor: "bg-blue-50",
+							borderColor: "border-blue-200",
 						},
 						{
 							name: "Emily Rodriguez",
 							role: "UX Designer",
 							isHost: false,
-							bgColor: "bg-infera-50",
-							borderColor: "border-infera-100",
+							bgColor: "bg-green-50",
+							borderColor: "border-green-200",
 						},
 						{
 							name: "David Kim",
 							role: "Data Analyst",
 							isHost: false,
-							bgColor: "bg-rose-50",
-							borderColor: "border-rose-100",
+							bgColor: "bg-purple-50",
+							borderColor: "border-purple-200",
 						},
 						{
 							name: "Lisa Thompson",
 							role: "Marketing Director",
 							isHost: false,
-							bgColor: "bg-slate-100",
-							borderColor: "border-slate-200",
+							bgColor: "bg-indigo-50",
+							borderColor: "border-indigo-200",
 						},
 					].map((participant, i) => (
 						<div key={i} className="relative group">
@@ -265,8 +266,8 @@ const LiveMeetingInterface: React.FC = () => {
 	);
 
 	const LiveTranscript = () => (
-		<Card className="h-full">
-			<CardHeader className="pb-3">
+		<Card className="h-full bg-white shadow-lg border-gray-200 flex flex-col">
+			<CardHeader className="pb-3 flex-shrink-0">
 				<div className="flex items-center justify-between">
 					<CardTitle className="text-lg flex items-center">
 						<div className="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-2"></div>
@@ -282,8 +283,8 @@ const LiveMeetingInterface: React.FC = () => {
 					</div>
 				</div>
 			</CardHeader>
-			<CardContent className="h-full overflow-y-auto">
-				<div className="space-y-4">
+			<CardContent className="flex-1 overflow-y-auto p-4">
+				<div className="space-y-4 pr-2">
 					{[
 						{
 							speaker: "Sarah Johnson",
@@ -358,11 +359,11 @@ const LiveMeetingInterface: React.FC = () => {
 	);
 
 	const SentimentTimeline = () => (
-		<Card className="h-full">
-			<CardHeader className="pb-3">
+		<Card className="h-full bg-white shadow-lg border-gray-200 flex flex-col">
+			<CardHeader className="pb-3 flex-shrink-0">
 				<CardTitle className="text-lg">Sentiment Timeline</CardTitle>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="flex-1 overflow-y-auto p-4">
 				<div className="space-y-4">
 					<div className="text-center">
 						<div className="text-2xl font-bold text-green-600 mb-1">78%</div>
@@ -390,8 +391,8 @@ const LiveMeetingInterface: React.FC = () => {
 	);
 
 	const ActionItemsSidebar = () => (
-		<Card className="h-full">
-			<CardHeader className="pb-3">
+		<Card className="h-full bg-white shadow-lg border-gray-200 flex flex-col">
+			<CardHeader className="pb-3 flex-shrink-0">
 				<div className="flex items-center justify-between">
 					<CardTitle className="text-lg">Action Items</CardTitle>
 					<Button variant="ghost" size="sm">
@@ -399,8 +400,8 @@ const LiveMeetingInterface: React.FC = () => {
 					</Button>
 				</div>
 			</CardHeader>
-			<CardContent>
-				<div className="space-y-3">
+			<CardContent className="flex-1 overflow-y-auto p-4">
+				<div className="space-y-3 pr-2">
 					{[
 						{
 							title: "Review API scalability",
@@ -514,87 +515,140 @@ const LiveMeetingInterface: React.FC = () => {
 			</div>
 
 			<div className="p-4 lg:p-6">
-				<div className="grid grid-cols-1 xl:grid-cols-4 gap-6 h-[calc(100vh-200px)]">
-					<div className="xl:col-span-3 space-y-6">
-						<div className="h-1/2">
-							<VideoGrid />
-						</div>
-
-						<div className="h-1/2 grid grid-cols-1 lg:grid-cols-2 gap-6">
-							<div className="h-full">
-								<LiveTranscript />
-							</div>
-
-							<div className="h-full">
-								<SentimentTimeline />
-							</div>
-						</div>
+				<div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+					{/* Left side - Video Grid */}
+					<div className="xl:col-span-2 h-[calc(100vh-200px)]">
+						<VideoGrid />
 					</div>
 
-					<div className="xl:col-span-1">
-						<ActionItemsSidebar />
+					{/* Right side - Tabbed Components */}
+					<div className="xl:col-span-1 h-[calc(100vh-200px)] flex flex-col">
+						{/* Tab Navigation */}
+						<div className="bg-white rounded-lg shadow-md p-1 border mb-4">
+							<div className="grid grid-cols-3 gap-1">
+								<button
+									onClick={() => setSelectedRightPanel("transcript")}
+									className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+										selectedRightPanel === "transcript"
+											? "bg-gray-100 text-gray-900 shadow-sm"
+											: "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+									}`}
+								>
+									Transcript
+								</button>
+								<button
+									onClick={() => setSelectedRightPanel("sentiment")}
+									className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+										selectedRightPanel === "sentiment"
+											? "bg-gray-100 text-gray-900 shadow-sm"
+											: "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+									}`}
+								>
+									Sentiment
+								</button>
+								<button
+									onClick={() => setSelectedRightPanel("actionItems")}
+									className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+										selectedRightPanel === "actionItems"
+											? "bg-gray-100 text-gray-900 shadow-sm"
+											: "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+									}`}
+								>
+									Actions
+								</button>
+							</div>
+						</div>
+						
+						{/* Component Display Area */}
+						<div className="flex-1 min-h-0">
+							{selectedRightPanel === "transcript" && (
+								<div className="h-full">
+									<LiveTranscript />
+								</div>
+							)}
+							{selectedRightPanel === "sentiment" && (
+								<div className="h-full">
+									<SentimentTimeline />
+								</div>
+							)}
+							{selectedRightPanel === "actionItems" && (
+								<div className="h-full">
+									<ActionItemsSidebar />
+								</div>
+							)}
+						</div>
 					</div>
 				</div>
 			</div>
 
-			<div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-30">
-				<div className="flex items-center justify-center space-x-4">
-					<Button
-						variant={isMuted ? "destructive" : "outline"}
-						size="lg"
-						onClick={handleToggleMute}
-						className="rounded-full w-12 h-12 p-0"
-					>
-						{isMuted ? (
-							<MicOff className="w-5 h-5" />
-						) : (
-							<Mic className="w-5 h-5" />
-						)}
-					</Button>
+		<div className="fixed bottom-0 left-0 right-0 bg-gray-100 border-t border-gray-200 p-4 z-30">
+			<div className="flex items-center justify-center space-x-4">
+				<Button
+					variant={isMuted ? "default" : "outline"}
+					size="lg"
+					onClick={handleToggleMute}
+					className={`rounded-full w-12 h-12 p-0 ${
+						isMuted 
+							? "bg-red-500 hover:bg-red-600 text-white border-0" 
+							: "bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+					}`}
+				>
+					{isMuted ? (
+						<MicOff className="w-5 h-5" />
+					) : (
+						<Mic className="w-5 h-5" />
+					)}
+				</Button>
 
-					<Button
-						variant={!isVideoOn ? "destructive" : "outline"}
-						size="lg"
-						onClick={handleToggleVideo}
-						className="rounded-full w-12 h-12 p-0"
-					>
-						{isVideoOn ? (
-							<Video className="w-5 h-5" />
-						) : (
-							<VideoOff className="w-5 h-5" />
-						)}
-					</Button>
+				<Button
+					variant={!isVideoOn ? "default" : "outline"}
+					size="lg"
+					onClick={handleToggleVideo}
+					className={`rounded-full w-12 h-12 p-0 ${
+						!isVideoOn 
+							? "bg-red-500 hover:bg-red-600 text-white border-0" 
+							: "bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+					}`}
+				>
+					{isVideoOn ? (
+						<Video className="w-5 h-5" />
+					) : (
+						<VideoOff className="w-5 h-5" />
+					)}
+				</Button>
 
-					<Button
-						variant={isScreenSharing ? "default" : "outline"}
-						size="lg"
-						onClick={handleToggleScreenShare}
-						className="rounded-full w-12 h-12 p-0"
-					>
-						<MonitorSpeaker className="w-5 h-5" />
-					</Button>
+				<Button
+					variant={isScreenSharing ? "default" : "outline"}
+					size="lg"
+					onClick={handleToggleScreenShare}
+					className={`rounded-full w-12 h-12 p-0 ${
+						isScreenSharing 
+							? "bg-blue-500 hover:bg-blue-600 text-white border-0" 
+							: "bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+					}`}
+				>
+					<MonitorSpeaker className="w-5 h-5" />
+				</Button>
 
-					<Button
-						variant="destructive"
-						size="lg"
-						onClick={handleEndMeeting}
-						className="rounded-full w-12 h-12 p-0"
-					>
-						<PhoneOff className="w-5 h-5" />
-					</Button>
+				<Button
+					variant="default"
+					size="lg"
+					onClick={handleEndMeeting}
+					className="rounded-full w-12 h-12 p-0 bg-red-500 hover:bg-red-600 text-white border-0"
+				>
+					<PhoneOff className="w-5 h-5" />
+				</Button>
 
-					<Button
-						variant="outline"
-						size="lg"
-						onClick={handleGenerateSummary}
-						className="hidden lg:flex"
-					>
-						Generate Summary
-					</Button>
-				</div>
+				<Button
+					variant="outline"
+					size="lg"
+					onClick={handleGenerateSummary}
+					className="hidden lg:flex bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+				>
+					Generate Summary
+				</Button>
 			</div>
-
-			{showSummaryModal && <SummaryModal />}
+		</div>			{showSummaryModal && <SummaryModal />}
 		</div>
 	);
 };
