@@ -235,15 +235,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
           
           {/* Social Login */}
           <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
+            <div className="flex items-center w-full">
+              <div className="flex-grow border-t border-gray-300" />
+              <span className="mx-4 text-xs text-muted-foreground tracking-wide uppercase select-none">
+                OR CONTINUE WITH
+              </span>
+              <div className="flex-grow border-t border-gray-300" />
             </div>
             
             <div className="mt-6 grid grid-cols-1 gap-3">

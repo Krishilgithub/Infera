@@ -18,7 +18,7 @@ export default function Header() {
 
 	const navigation = [
 		{ name: "Features", href: "/features" },
-		{ name: "Pricing", href: "/pricing" },
+	// Pricing link removed
 		{ name: "Integrations", href: "/integrations" },
 		{ name: "Demo", href: "/demo" },
 	];
