@@ -1,5 +1,5 @@
-import LiveMeetingInterface from '@/components/live-meeting-interface'
+import AILiveMeetingInterface from "@/components/ai-live-meeting-interface";
 
 export default function LiveMeetingPage() {
-  return <LiveMeetingInterface />
+	return <AILiveMeetingInterface />;
 }

@@ -1,629 +1,477 @@
-"use client";
+﻿'use client';
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-	Mic,
-	MicOff,
-	Video,
-	VideoOff,
-	Phone,
-	PhoneOff,
-	Settings,
-	Users,
-	MessageSquare,
-	Share,
-	MoreVertical,
-	Volume2,
-	VolumeX,
-	Monitor,
-	Hand,
-	Sparkles,
-	Download,
-	Copy,
-	Check,
-	ArrowLeft,
-} from "lucide-react";
-import { useMeeting } from "@/contexts/meeting-context";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { 
+  Video, 
+  VideoOff, 
+  Mic, 
+  MicOff, 
+  MonitorSpeaker, 
+  PhoneOff, 
+  Users, 
+  Clock, 
+  Download, 
+  Share, 
+  Plus,
+  CheckCircle,
+  Search,
+  Filter,
+  Circle,
+  Heart,
+  TrendingUp,
+  TrendingDown,
+  Play,
+  Pause,
+  MoreHorizontal,
+  Square
+} from 'lucide-react';
 
-// Sample participants for demo - will be replaced by context
-const sampleParticipants = [
-	{
-		id: "1",
-		name: "Sarah Johnson",
-		role: "host" as const,
-		video: true,
-		audio: true,
-		avatar: "👩‍💼",
-		isCurrentUser: false,
-	},
-	{
-		id: "2",
-		name: "Michael Chen",
-		role: "member" as const,
-		video: true,
-		audio: true,
-		avatar: "👨‍💻",
-		isCurrentUser: false,
-	},
-	{
-		id: "3",
-		name: "Emily Rodriguez",
-		role: "member" as const,
-		video: false,
-		audio: true,
-		avatar: "👩‍🎨",
-		isCurrentUser: false,
-	},
-	{
-		id: "4",
-		name: "David Kim",
-		role: "member" as const,
-		video: true,
-		audio: false,
-		avatar: "👨‍📊",
-		isCurrentUser: false,
-	},
-	{
-		id: "5",
-		name: "Lisa Thompson",
-		role: "member" as const,
-		video: true,
-		audio: true,
-		avatar: "👩‍💼",
-		isCurrentUser: false,
-	},
-];
+const LiveMeetingInterface: React.FC = () => {
+  const router = useRouter();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isVideoOn, setIsVideoOn] = useState(true);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [showJargonTooltips, setShowJargonTooltips] = useState(false);
+  const [meetingStatus, setMeetingStatus] = useState('live');
+  const [meetingDuration, setMeetingDuration] = useState('00:15:32');
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
 
-const liveTranscript = [
-	{
-		time: "2:34 PM",
-		speaker: "Sarah Johnson",
-		text: "So for the Q4 roadmap, we need to prioritize the API scalability improvements.",
-	},
-	{
-		time: "2:34 PM",
-		speaker: "Michael Chen",
-		text: "I agree. The current infrastructure won't handle the projected load increase.",
-	},
-	{
-		time: "2:35 PM",
-		speaker: "Emily Rodriguez",
-		text: "What about the UX improvements? Should we push those to Q1?",
-	},
-	{
-		time: "2:35 PM",
-		speaker: "Sarah Johnson",
-		text: "Let's discuss that after we finalize the backend work.",
-	},
-];
+  // Update meeting duration every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const startTime = new Date(now.getTime() - 15 * 60 * 1000 - 32 * 1000);
+      const diff = now.getTime() - startTime.getTime();
+      
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      setMeetingDuration(
+        hours.toString().padStart(2, '0') + ':' +
+        minutes.toString().padStart(2, '0') + ':' +
+        seconds.toString().padStart(2, '0')
+      );
+    }, 1000);
 
-const insights = [
-	{ type: "sentiment", text: "Meeting sentiment is positive", icon: "😊" },
-	{ type: "action", text: "2 action items identified", icon: "✅" },
-	{ type: "engagement", text: "High engagement detected", icon: "📈" },
-];
+    return () => clearInterval(interval);
+  }, []);
 
-export default function LiveMeetingInterface() {
-	const [showTranscript, setShowTranscript] = useState(true);
-	const [showInsights, setShowInsights] = useState(false);
-	const [copied, setCopied] = useState(false);
-	const [meetingDuration, setMeetingDuration] = useState(0);
-	const [isScreenSharing, setIsScreenSharing] = useState(false);
-	const [isHandRaised, setIsHandRaised] = useState(false);
-	const [chatMessages, setChatMessages] = useState([
-		{
-			id: 1,
-			sender: "Sarah Johnson",
-			message: "Welcome everyone!",
-			time: "2:34 PM",
-		},
-		{
-			id: 2,
-			sender: "Michael Chen",
-			message: "Thanks for having me",
-			time: "2:35 PM",
-		},
-		{
-			id: 3,
-			sender: "You",
-			message: "Great to see everyone here",
-			time: "2:35 PM",
-			isCurrentUser: true,
-		},
-	]);
-	const [newMessage, setNewMessage] = useState("");
-	const [showChat, setShowChat] = useState(false);
+  const handleToggleRecording = () => {
+    setIsRecording(!isRecording);
+  };
 
-	const {
-		currentMeeting,
-		participants,
-		isHost,
-		isMuted,
-		isVideoOff,
-		meetingCode,
-		leaveMeeting,
-		toggleMute,
-		toggleVideo,
-	} = useMeeting();
+  const handleToggleMute = () => {
+    setIsMuted(!isMuted);
+  };
 
-	const router = useRouter();
+  const handleToggleVideo = () => {
+    setIsVideoOn(!isVideoOn);
+  };
 
-	// Redirect if no meeting
-	useEffect(() => {
-		if (!currentMeeting) {
-			router.push("/dashboard/meeting");
-		}
-	}, [currentMeeting, router]);
+  const handleToggleScreenShare = () => {
+    setIsScreenSharing(!isScreenSharing);
+  };
 
-	// Meeting duration timer
-	useEffect(() => {
-		if (!currentMeeting) return;
+  const handleEndMeeting = () => {
+    setMeetingStatus('ended');
+    setShowSummaryModal(true);
+    setTimeout(() => {
+      router.push('/dashboard/meeting-details');
+    }, 3000);
+  };
 
-		const startTime = new Date(currentMeeting.createdAt).getTime();
-		const interval = setInterval(() => {
-			setMeetingDuration(Math.floor((Date.now() - startTime) / 1000));
-		}, 1000);
+  const handleExportTranscript = () => {
+    console.log('Exporting transcript...');
+  };
 
-		return () => clearInterval(interval);
-	}, [currentMeeting]);
+  const handleGenerateSummary = () => {
+    setShowSummaryModal(true);
+  };
 
-	const formatDuration = (seconds: number) => {
-		const hours = Math.floor(seconds / 3600);
-		const minutes = Math.floor((seconds % 3600) / 60);
-		const secs = seconds % 60;
+  const handleShareMeeting = () => {
+    navigator.clipboard?.writeText('https://meetingmonitor.com/join/123-456-789');
+    console.log('Meeting link copied to clipboard');
+  };
 
-		if (hours > 0) {
-			return `${hours}:${minutes.toString().padStart(2, "0")}:${secs
-				.toString()
-				.padStart(2, "0")}`;
-		}
-		return `${minutes}:${secs.toString().padStart(2, "0")}`;
-	};
+  const SummaryModal = () => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+      <div className="bg-card border border-border rounded-lg shadow-xl max-w-md w-full">
+        <div className="p-6 text-center">
+          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle size={24} className="text-green-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground mb-2">
+            Meeting Summary Generated
+          </h3>
+          <p className="text-muted-foreground mb-6">
+            Your meeting summary and action items have been automatically generated and saved.
+          </p>
+          <div className="flex items-center space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowSummaryModal(false)}
+              className="flex-1"
+            >
+              Close
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => router.push('/dashboard/meeting-details')}
+              className="flex-1"
+            >
+              View Details
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
-	const copyMeetingCode = () => {
-		if (meetingCode) {
-			navigator.clipboard.writeText(meetingCode);
-			setCopied(true);
-			setTimeout(() => setCopied(false), 2000);
-		}
-	};
+  const VideoGrid = () => (
+    <Card className="h-full border-navy-200 bg-gradient-to-br from-navy-50/50 to-teal-50/50">
+      <CardContent className="p-6 h-full">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 h-full">
+          {[
+            { name: "Sarah Johnson", role: "Product Manager", isHost: true, bgColor: "bg-navy-100", borderColor: "border-navy-200" },
+            { name: "Michael Chen", role: "Engineering Lead", isHost: false, bgColor: "bg-teal-100", borderColor: "border-teal-200" },
+            { name: "Emily Rodriguez", role: "UX Designer", isHost: false, bgColor: "bg-navy-50", borderColor: "border-navy-100" },
+            { name: "David Kim", role: "Data Analyst", isHost: false, bgColor: "bg-teal-50", borderColor: "border-teal-100" },
+            { name: "Lisa Thompson", role: "Marketing Director", isHost: false, bgColor: "bg-slate-100", borderColor: "border-slate-200" }
+          ].map((participant, i) => (
+            <div key={i} className="relative group">
+              {/* Main video container with enhanced styling */}
+              <div className={`relative h-full ${participant.bgColor} rounded-xl overflow-hidden shadow-lg border-2 ${participant.isHost ? 'border-yellow-300' : participant.borderColor} transition-all duration-300 hover:shadow-xl hover:scale-[1.02]`}>
+                
+                {/* Host crown indicator */}
+                {participant.isHost && (
+                  <div className="absolute top-3 left-3 z-10">
+                    <div className="bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
+                      <span>👑</span>
+                      <span>HOST</span>
+                    </div>
+                  </div>
+                )}
 
-	const handleLeaveMeeting = () => {
-		leaveMeeting();
-		router.push("/dashboard");
-	};
+                {/* Recording indicator */}
+                {isRecording && (
+                  <div className="absolute top-3 right-3 z-10">
+                    <div className="bg-red-500 rounded-full p-2 animate-pulse shadow-lg">
+                      <Circle size={8} className="text-white fill-current" />
+                    </div>
+                  </div>
+                )}
 
-	const toggleScreenShare = () => {
-		setIsScreenSharing(!isScreenSharing);
-	};
+                {/* Avatar and content */}
+                <div className="w-full h-full flex flex-col items-center justify-center p-4 relative">
+                  
+                  {/* Profile avatar */}
+                  <div className="relative z-10 w-20 h-20 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-white shadow-lg mb-3">
+                    <span className="text-navy-700 font-bold text-xl">
+                      {participant.name.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
 
-	const toggleHandRaise = () => {
-		setIsHandRaised(!isHandRaised);
-	};
+                  {/* Participant info */}
+                  <div className="relative z-10 text-center">
+                    <h3 className="text-navy-800 font-semibold text-sm mb-1">
+                      {participant.name}
+                    </h3>
+                    <p className="text-navy-600 text-xs">
+                      {participant.role}
+                    </p>
+                  </div>
+                </div>
 
-	const sendMessage = () => {
-		if (newMessage.trim()) {
-			const message = {
-				id: chatMessages.length + 1,
-				sender: "You",
-				message: newMessage.trim(),
-				time: new Date().toLocaleTimeString("en-US", {
-					hour: "2-digit",
-					minute: "2-digit",
-				}),
-				isCurrentUser: true,
-			};
-			setChatMessages([...chatMessages, message]);
-			setNewMessage("");
-		}
-	};
+                {/* Audio status indicator */}
+                <div className="absolute bottom-3 right-3 z-10">
+                  {isMuted ? (
+                    <div className="bg-red-500/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
+                      <MicOff size={14} className="text-white" />
+                    </div>
+                  ) : (
+                    <div className="bg-green-500/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
+                      <Mic size={14} className="text-white" />
+                    </div>
+                  )}
+                </div>
 
-	const handleKeyPress = (e: React.KeyboardEvent) => {
-		if (e.key === "Enter") {
-			sendMessage();
-		}
-	};
+                {/* Connection quality indicator */}
+                <div className="absolute bottom-3 left-3 z-10">
+                  <div className="flex space-x-1">
+                    <div className="w-1 h-4 bg-navy-400 rounded-full"></div>
+                    <div className="w-1 h-3 bg-navy-500 rounded-full"></div>
+                    <div className="w-1 h-2 bg-navy-600 rounded-full"></div>
+                  </div>
+                </div>
 
-	// Use context participants or fallback to sample data
-	const displayParticipants =
-		participants.length > 0 ? participants : sampleParticipants;
+                {/* Hover overlay */}
+                <div className="absolute inset-0 bg-navy-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
-	return (
-		<div className="h-screen bg-gray-900 text-white overflow-hidden">
-			{/* Top Bar */}
-			<div className="flex items-center justify-between p-4 bg-gray-800">
-				<div className="flex items-center space-x-4">
-					<div className="flex items-center space-x-2">
-						<div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-						<span className="text-sm font-medium">Live Meeting</span>
-					</div>
-					<span className="text-sm text-gray-300">
-						{currentMeeting?.title || "Meeting"}
-					</span>
-					{meetingCode && (
-						<div className="flex items-center space-x-2">
-							<span className="text-sm text-gray-400">Code:</span>
-							<span className="text-sm font-mono font-bold text-blue-400">
-								{meetingCode}
-							</span>
-							<Button
-								onClick={copyMeetingCode}
-								size="sm"
-								variant="ghost"
-								className="text-gray-400 hover:text-white p-1"
-							>
-								{copied ? (
-									<Check className="h-3 w-3" />
-								) : (
-									<Copy className="h-3 w-3" />
-								)}
-							</Button>
-						</div>
-					)}
-				</div>
-				<div className="flex items-center space-x-2">
-					<span className="text-sm text-gray-300">
-						{formatDuration(meetingDuration)}
-					</span>
-					<Button
-						variant="ghost"
-						size="sm"
-						className="text-white hover:bg-gray-700"
-					>
-						<Users className="h-4 w-4 mr-2" />
-						{displayParticipants.length}
-					</Button>
-					<Button
-						variant="ghost"
-						size="sm"
-						className="text-white hover:bg-gray-700"
-					>
-						<Settings className="h-4 w-4" />
-					</Button>
-					<Button
-						variant="ghost"
-						size="sm"
-						className="text-white hover:bg-gray-700"
-					>
-						<MoreVertical className="h-4 w-4" />
-					</Button>
-				</div>
-			</div>
+  const LiveTranscript = () => (
+    <Card className="h-full">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg flex items-center">
+            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-2"></div>
+            Live Transcript
+          </CardTitle>
+          <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="sm">
+              <Search size={16} />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleExportTranscript}>
+              <Download size={16} />
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="h-full overflow-y-auto">
+        <div className="space-y-4">
+          {[
+            { speaker: "Sarah Johnson", time: "14:02", text: "Let's start by reviewing our Q4 objectives and KPIs.", sentiment: "positive" },
+            { speaker: "Michael Chen", time: "14:03", text: "The API performance metrics look great this quarter.", sentiment: "positive" },
+            { speaker: "Emily Rodriguez", time: "14:04", text: "User feedback on the new interface has been overwhelmingly positive.", sentiment: "positive" },
+            { speaker: "David Kim", time: "14:05", text: "I have some concerns about the conversion rates we need to address.", sentiment: "concerned" },
+            { speaker: "Lisa Thompson", time: "14:06", text: "Marketing campaigns are exceeding our ROI expectations.", sentiment: "excited" }
+          ].map((entry, i) => (
+            <div key={i} className="flex items-start space-x-3 p-3 bg-muted/50 rounded-lg">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-medium text-primary">
+                    {entry.speaker.split(' ').map(n => n[0]).join('')}
+                  </span>
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center space-x-2 mb-1">
+                  <span className="text-sm font-medium text-foreground">{entry.speaker}</span>
+                  <span className="text-xs text-muted-foreground">{entry.time}</span>
+                  {entry.sentiment === 'positive' && <TrendingUp size={12} className="text-green-500" />}
+                  {entry.sentiment === 'concerned' && <TrendingDown size={12} className="text-orange-500" />}
+                  {entry.sentiment === 'excited' && <Heart size={12} className="text-pink-500" />}
+                </div>
+                <p className="text-sm text-foreground">{entry.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
-			<div className="flex h-[calc(100vh-80px)]">
-				{/* Main Video Area */}
-				<div className="flex-1 p-4">
-					<div className="grid grid-cols-3 gap-4 h-full">
-						{displayParticipants.map((participant) => (
-							<motion.div
-								key={participant.id}
-								initial={{ opacity: 0, scale: 0.95 }}
-								animate={{ opacity: 1, scale: 1 }}
-								className={`relative bg-gray-800 rounded-lg overflow-hidden ${
-									participant.isCurrentUser ? "ring-2 ring-blue-500" : ""
-								}`}
-							>
-								{participant.video ? (
-									<div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-										<span className="text-6xl">{participant.avatar}</span>
-									</div>
-								) : (
-									<div className="w-full h-full bg-gray-700 flex items-center justify-center">
-										<div className="text-center">
-											<VideoOff className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-											<span className="text-4xl">{participant.avatar}</span>
-										</div>
-									</div>
-								)}
+  const SentimentTimeline = () => (
+    <Card className="h-full">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">Sentiment Timeline</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-green-600 mb-1">78%</div>
+            <div className="text-sm text-muted-foreground">Overall Positive</div>
+          </div>
+          <div className="h-32 bg-muted/50 rounded-lg flex items-end justify-center p-4">
+            <div className="flex items-end space-x-1 h-full w-full">
+              {[65, 72, 80, 85, 78, 82, 75, 88, 92, 85, 78].map((value, i) => (
+                <div
+                  key={i}
+                  className="bg-gradient-to-t from-green-500 to-blue-500 rounded-sm flex-1"
+                  style={{ height: value + '%' }}
+                ></div>
+              ))}
+            </div>
+          </div>
+          <div className="text-xs text-muted-foreground text-center">
+            Last 10 minutes
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
-								{/* Participant Info */}
-								<div className="absolute bottom-2 left-2 right-2">
-									<div className="bg-black bg-opacity-60 rounded px-2 py-1">
-										<div className="flex items-center justify-between">
-											<span className="text-sm font-medium truncate">
-												{participant.name}
-											</span>
-											<div className="flex items-center space-x-1">
-												{!participant.audio && (
-													<MicOff className="h-3 w-3 text-red-400" />
-												)}
-												{participant.role === "host" && (
-													<div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-												)}
-											</div>
-										</div>
-										{participant.isCurrentUser && (
-											<span className="text-xs text-blue-400">You</span>
-										)}
-									</div>
-								</div>
+  const ActionItemsSidebar = () => (
+    <Card className="h-full">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">Action Items</CardTitle>
+          <Button variant="ghost" size="sm">
+            <Plus size={16} />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {[
+            { title: "Review API scalability", assignee: "Michael", priority: "high" },
+            { title: "Update design documentation", assignee: "Emily", priority: "medium" },
+            { title: "Analyze conversion metrics", assignee: "David", priority: "high" },
+            { title: "Schedule follow-up meeting", assignee: "Sarah", priority: "low" }
+          ].map((item, i) => (
+            <div key={i} className="p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className={'text-xs px-2 py-1 rounded ' + (
+                  item.priority === 'high' ? 'bg-red-100 text-red-700' :
+                  item.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                  'bg-green-100 text-green-700'
+                )}>
+                  {item.priority}
+                </span>
+                <Button variant="ghost" size="sm">
+                  <MoreHorizontal size={12} />
+                </Button>
+              </div>
+              <h4 className="text-sm font-medium text-foreground mb-1">{item.title}</h4>
+              <p className="text-xs text-muted-foreground">Assigned to: {item.assignee}</p>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
-								{/* Speaking Indicator */}
-								{participant.audio && Math.random() > 0.7 && (
-									<div className="absolute top-2 right-2">
-										<div className="flex space-x-1">
-											{[...Array(3)].map((_, i) => (
-												<div
-													key={i}
-													className="w-1 bg-green-400 rounded animate-pulse"
-													style={{
-														height: `${Math.random() * 20 + 10}px`,
-														animationDelay: `${i * 100}ms`,
-													}}
-												></div>
-											))}
-										</div>
-									</div>
-								)}
-							</motion.div>
-						))}
-					</div>
-				</div>
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="bg-card border-b border-border">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium text-foreground">LIVE</span>
+              </div>
+              <div className="border-l border-border pl-4">
+                <h1 className="text-xl font-semibold text-foreground">Weekly Team Standup</h1>
+                <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                  <div className="flex items-center space-x-1">
+                    <Users size={14} />
+                    <span>5 participants</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Clock size={14} />
+                    <span>{meetingDuration}</span>
+                  </div>
+                  {isRecording && (
+                    <div className="flex items-center space-x-1 text-red-500">
+                      <Circle size={8} className="fill-current" />
+                      <span>Recording</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button variant="ghost" size="sm" onClick={handleShareMeeting}>
+                <Share size={16} />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleExportTranscript}>
+                <Download size={16} />
+              </Button>
+              <Button
+                variant={isRecording ? "destructive" : "outline"}
+                size="sm"
+                onClick={handleToggleRecording}
+                className="flex items-center space-x-1"
+              >
+                {isRecording ? <Square size={14} /> : <Circle size={14} />}
+                <span>{isRecording ? 'Stop' : 'Record'}</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-				{/* Right Sidebar */}
-				<div className="w-80 bg-gray-800 border-l border-gray-700">
-					<div className="flex border-b border-gray-700">
-						<button
-							onClick={() => {
-								setShowTranscript(true);
-								setShowInsights(false);
-								setShowChat(false);
-							}}
-							className={`flex-1 p-3 text-sm font-medium ${
-								showTranscript
-									? "bg-gray-700 text-white"
-									: "text-gray-400 hover:text-white"
-							}`}
-						>
-							Transcript
-						</button>
-						<button
-							onClick={() => {
-								setShowInsights(true);
-								setShowTranscript(false);
-								setShowChat(false);
-							}}
-							className={`flex-1 p-3 text-sm font-medium ${
-								showInsights
-									? "bg-gray-700 text-white"
-									: "text-gray-400 hover:text-white"
-							}`}
-						>
-							Insights
-						</button>
-						<button
-							onClick={() => {
-								setShowChat(true);
-								setShowTranscript(false);
-								setShowInsights(false);
-							}}
-							className={`flex-1 p-3 text-sm font-medium ${
-								showChat
-									? "bg-gray-700 text-white"
-									: "text-gray-400 hover:text-white"
-							}`}
-						>
-							Chat
-						</button>
-					</div>
+      <div className="p-4 lg:p-6">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 h-[calc(100vh-200px)]">
+          
+          <div className="xl:col-span-3 space-y-6">
+            
+            <div className="h-1/2">
+              <VideoGrid />
+            </div>
 
-					{showTranscript && (
-						<div className="p-4 h-full overflow-y-auto">
-							<div className="space-y-4">
-								<div className="flex items-center justify-between mb-4">
-									<h3 className="font-medium">Live Transcript</h3>
-									<Button
-										size="sm"
-										variant="ghost"
-										className="text-gray-400 hover:text-white"
-									>
-										<Download className="h-4 w-4" />
-									</Button>
-								</div>
+            <div className="h-1/2 grid grid-cols-1 lg:grid-cols-2 gap-6">
+              
+              <div className="h-full">
+                <LiveTranscript />
+              </div>
 
-								{liveTranscript.map((entry, index) => (
-									<motion.div
-										key={index}
-										initial={{ opacity: 0, y: 20 }}
-										animate={{ opacity: 1, y: 0 }}
-										transition={{ delay: index * 0.1 }}
-										className="space-y-1"
-									>
-										<div className="flex items-center space-x-2 text-xs text-gray-400">
-											<span>{entry.time}</span>
-											<span>•</span>
-											<span className="font-medium text-blue-400">
-												{entry.speaker}
-											</span>
-										</div>
-										<p className="text-sm text-gray-200">{entry.text}</p>
-									</motion.div>
-								))}
+              <div className="h-full">
+                <SentimentTimeline />
+              </div>
+            </div>
+          </div>
 
-								{/* Typing Indicator */}
-								<div className="flex items-center space-x-2 text-xs text-gray-400">
-									<span>2:36 PM</span>
-									<span>•</span>
-									<span className="font-medium text-blue-400">David Kim</span>
-									<div className="flex space-x-1">
-										<div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce"></div>
-										<div
-											className="w-1 h-1 bg-gray-400 rounded-full animate-bounce"
-											style={{ animationDelay: "0.1s" }}
-										></div>
-										<div
-											className="w-1 h-1 bg-gray-400 rounded-full animate-bounce"
-											style={{ animationDelay: "0.2s" }}
-										></div>
-									</div>
-								</div>
-							</div>
-						</div>
-					)}
+          <div className="xl:col-span-1">
+            <ActionItemsSidebar />
+          </div>
+        </div>
+      </div>
 
-					{showInsights && (
-						<div className="p-4">
-							<h3 className="font-medium mb-4">AI Insights</h3>
-							<div className="space-y-3">
-								{insights.map((insight, index) => (
-									<motion.div
-										key={index}
-										initial={{ opacity: 0, x: 20 }}
-										animate={{ opacity: 1, x: 0 }}
-										transition={{ delay: index * 0.1 }}
-										className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg"
-									>
-										<span className="text-lg">{insight.icon}</span>
-										<span className="text-sm">{insight.text}</span>
-									</motion.div>
-								))}
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-30">
+        <div className="flex items-center justify-center space-x-4">
+          <Button
+            variant={isMuted ? "destructive" : "outline"}
+            size="lg"
+            onClick={handleToggleMute}
+            className="rounded-full w-12 h-12 p-0"
+          >
+            {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+          </Button>
 
-								<div className="mt-4 p-3 bg-blue-900 bg-opacity-50 rounded-lg border border-blue-700">
-									<div className="flex items-center space-x-2 mb-2">
-										<Sparkles className="h-4 w-4 text-blue-400" />
-										<span className="text-sm font-medium text-blue-400">
-											AI Suggestion
-										</span>
-									</div>
-									<p className="text-xs text-gray-300">
-										Consider scheduling a follow-up meeting to discuss UX
-										improvements in detail.
-									</p>
-								</div>
-							</div>
-						</div>
-					)}
+          <Button
+            variant={!isVideoOn ? "destructive" : "outline"}
+            size="lg"
+            onClick={handleToggleVideo}
+            className="rounded-full w-12 h-12 p-0"
+          >
+            {isVideoOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
+          </Button>
 
-					{showChat && (
-						<div className="flex flex-col h-full">
-							<div className="p-4 border-b border-gray-700">
-								<h3 className="font-medium">Meeting Chat</h3>
-							</div>
-							<div className="flex-1 overflow-y-auto p-4 space-y-3">
-								{chatMessages.map((message) => (
-									<motion.div
-										key={message.id}
-										initial={{ opacity: 0, y: 10 }}
-										animate={{ opacity: 1, y: 0 }}
-										className={`flex flex-col ${
-											message.isCurrentUser ? "items-end" : "items-start"
-										}`}
-									>
-										<div
-											className={`max-w-xs p-3 rounded-lg ${
-												message.isCurrentUser
-													? "bg-blue-600 text-white"
-													: "bg-gray-700 text-gray-200"
-											}`}
-										>
-											<p className="text-sm">{message.message}</p>
-										</div>
-										<div className="flex items-center space-x-2 mt-1">
-											<span className="text-xs text-gray-400">
-												{message.sender}
-											</span>
-											<span className="text-xs text-gray-500">
-												{message.time}
-											</span>
-										</div>
-									</motion.div>
-								))}
-							</div>
-							<div className="p-4 border-t border-gray-700">
-								<div className="flex space-x-2">
-									<Input
-										type="text"
-										placeholder="Type a message..."
-										value={newMessage}
-										onChange={(e) => setNewMessage(e.target.value)}
-										onKeyPress={handleKeyPress}
-										className="flex-1 bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-									/>
-									<Button
-										onClick={sendMessage}
-										size="sm"
-										className="bg-blue-600 hover:bg-blue-700"
-									>
-										Send
-									</Button>
-								</div>
-							</div>
-						</div>
-					)}
-				</div>
-			</div>
+          <Button
+            variant={isScreenSharing ? "default" : "outline"}
+            size="lg"
+            onClick={handleToggleScreenShare}
+            className="rounded-full w-12 h-12 p-0"
+          >
+            <MonitorSpeaker className="w-5 h-5" />
+          </Button>
 
-			{/* Bottom Control Bar */}
-			<div className="absolute bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 p-4">
-				<div className="flex items-center justify-center space-x-4">
-					<Button
-						variant={isMuted ? "destructive" : "secondary"}
-						size="lg"
-						onClick={toggleMute}
-						className="rounded-full"
-					>
-						{isMuted ? (
-							<MicOff className="h-5 w-5" />
-						) : (
-							<Mic className="h-5 w-5" />
-						)}
-					</Button>
+          <Button
+            variant="destructive"
+            size="lg"
+            onClick={handleEndMeeting}
+            className="rounded-full w-12 h-12 p-0"
+          >
+            <PhoneOff className="w-5 h-5" />
+          </Button>
 
-					<Button
-						variant={isVideoOff ? "destructive" : "secondary"}
-						size="lg"
-						onClick={toggleVideo}
-						className="rounded-full"
-					>
-						{isVideoOff ? (
-							<VideoOff className="h-5 w-5" />
-						) : (
-							<Video className="h-5 w-5" />
-						)}
-					</Button>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={handleGenerateSummary}
+            className="hidden lg:flex"
+          >
+            Generate Summary
+          </Button>
+        </div>
+      </div>
 
-					<Button
-						variant={isScreenSharing ? "destructive" : "secondary"}
-						size="lg"
-						className="rounded-full"
-						onClick={toggleScreenShare}
-					>
-						<Monitor className="h-5 w-5" />
-					</Button>
+      {showSummaryModal && <SummaryModal />}
+    </div>
+  );
+};
 
-					<Button
-						variant={isHandRaised ? "destructive" : "secondary"}
-						size="lg"
-						className="rounded-full"
-						onClick={toggleHandRaise}
-					>
-						<Hand className="h-5 w-5" />
-					</Button>
-
-					<Button
-						variant={showChat ? "destructive" : "secondary"}
-						size="lg"
-						className="rounded-full"
-						onClick={() => setShowChat(!showChat)}
-					>
-						<MessageSquare className="h-5 w-5" />
-					</Button>
-
-					<Button
-						variant="destructive"
-						size="lg"
-						className="rounded-full"
-						onClick={handleLeaveMeeting}
-					>
-						<PhoneOff className="h-5 w-5" />
-					</Button>
-				</div>
-			</div>
-		</div>
-	);
-}
+export default LiveMeetingInterface;
