@@ -1,132 +1,136 @@
-"use client"
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { useTheme } from 'next-themes'
-import { motion } from 'framer-motion'
-import { Menu, X, Sun, Moon, Brain } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { useState } from "react";
+import Link from "next/link";
+import { useTheme } from "next-themes";
+import { motion } from "framer-motion";
+import { Menu, X, Sun, Moon, Brain } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { theme, setTheme } = useTheme()
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const { theme, setTheme } = useTheme();
 
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark')
-  }
+	const toggleTheme = () => {
+		setTheme(theme === "dark" ? "light" : "dark");
+	};
 
-  const navigation = [
-    { name: 'Features', href: '/features' },
-    { name: 'Pricing', href: '/pricing' },
-    { name: 'Integrations', href: '/integrations' },
-    { name: 'Demo', href: '/demo' },
-  ]
+	const navigation = [
+		{ name: "Features", href: "/features" },
+		{ name: "Pricing", href: "/pricing" },
+		{ name: "Integrations", href: "/integrations" },
+		{ name: "Demo", href: "/demo" },
+	];
 
-  return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-navy-600 to-teal-600">
-            <Brain className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-xl font-bold gradient-text">Infera</span>
-        </Link>
+	return (
+		<header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+			<div className="container flex h-16 items-center justify-between">
+				{/* Logo */}
+				<Link href="/" className="flex items-center space-x-2">
+					<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-infera-600 to-rose-600">
+						<Brain className="h-5 w-5 text-white" />
+					</div>
+					<span className="text-xl font-bold gradient-text">Infera</span>
+				</Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-8">
-          {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {item.name}
-            </Link>
-          ))}
-        </nav>
+				{/* Desktop Navigation */}
+				<nav className="hidden md:flex items-center space-x-8">
+					{navigation.map((item) => (
+						<Link
+							key={item.name}
+							href={item.href}
+							className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+						>
+							{item.name}
+						</Link>
+					))}
+				</nav>
 
-        {/* Desktop Actions */}
-        <div className="hidden md:flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            aria-label="Toggle theme"
-          >
-            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          </Button>
-          
-          <Link href="/login">
-            <Button variant="ghost">Sign In</Button>
-          </Link>
-          
-          <Link href="/signup">
-            <Button variant="gradient">Start Free Trial</Button>
-          </Link>
-        </div>
+				{/* Desktop Actions */}
+				<div className="hidden md:flex items-center space-x-4">
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={toggleTheme}
+						aria-label="Toggle theme"
+					>
+						<Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+						<Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+					</Button>
 
-        {/* Mobile menu button */}
-        <div className="flex md:hidden items-center space-x-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            aria-label="Toggle theme"
-          >
-            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
-        </div>
-      </div>
+					<Link href="/login">
+						<Button variant="ghost">Sign In</Button>
+					</Link>
 
-      {/* Mobile Navigation */}
-      {isMenuOpen && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          className="md:hidden border-t bg-background"
-        >
-          <div className="container py-4 space-y-4">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="block text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item.name}
-              </Link>
-            ))}
-            
-            <div className="flex flex-col space-y-2 pt-4 border-t">
-              <Link href="/login" onClick={() => setIsMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start">
-                  Sign In
-                </Button>
-              </Link>
-              
-              <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
-                <Button variant="gradient" className="w-full">
-                  Start Free Trial
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </motion.div>
-      )}
-    </header>
-  )
+					<Link href="/signup">
+						<Button variant="gradient">Start Free Trial</Button>
+					</Link>
+				</div>
+
+				{/* Mobile menu button */}
+				<div className="flex md:hidden items-center space-x-2">
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={toggleTheme}
+						aria-label="Toggle theme"
+					>
+						<Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+						<Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+					</Button>
+
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => setIsMenuOpen(!isMenuOpen)}
+						aria-label="Toggle menu"
+					>
+						{isMenuOpen ? (
+							<X className="h-5 w-5" />
+						) : (
+							<Menu className="h-5 w-5" />
+						)}
+					</Button>
+				</div>
+			</div>
+
+			{/* Mobile Navigation */}
+			{isMenuOpen && (
+				<motion.div
+					initial={{ opacity: 0, height: 0 }}
+					animate={{ opacity: 1, height: "auto" }}
+					exit={{ opacity: 0, height: 0 }}
+					className="md:hidden border-t bg-background"
+				>
+					<div className="container py-4 space-y-4">
+						{navigation.map((item) => (
+							<Link
+								key={item.name}
+								href={item.href}
+								className="block text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+								onClick={() => setIsMenuOpen(false)}
+							>
+								{item.name}
+							</Link>
+						))}
+
+						<div className="flex flex-col space-y-2 pt-4 border-t">
+							<Link href="/login" onClick={() => setIsMenuOpen(false)}>
+								<Button variant="ghost" className="w-full justify-start">
+									Sign In
+								</Button>
+							</Link>
+
+							<Link href="/signup" onClick={() => setIsMenuOpen(false)}>
+								<Button variant="gradient" className="w-full">
+									Start Free Trial
+								</Button>
+							</Link>
+						</div>
+					</div>
+				</motion.div>
+			)}
+		</header>
+	);
 }

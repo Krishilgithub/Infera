@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: infera-web
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: NEXT_TELEMETRY_DISABLED
+        value: 1
+    # Auto-deploy from main branch
+    autoDeploy: true
+    # Health check
+    healthCheckPath: /api/health
