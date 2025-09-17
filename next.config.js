@@ -7,6 +7,9 @@ const nextConfig = {
 	// Optimize for production
 	compress: true,
 	poweredByHeader: false,
+	// Performance optimizations
+	swcMinify: true,
+	reactStrictMode: true,
 	// Enable standalone output for Docker/Render
 	output: "standalone",
 	// Headers for security
