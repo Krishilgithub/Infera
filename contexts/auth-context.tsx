@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { AuthUser, AuthContextType } from '@/lib/types/auth'
@@ -30,10 +30,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null)
         setLoading(false)
         
-        // Redirect based on auth state
-        if (event === 'SIGNED_IN' && session?.user) {
-          router.push('/dashboard')
-        } else if (event === 'SIGNED_OUT') {
+        // Only redirect on sign out, let OAuth callback handle sign in redirects
+        if (event === 'SIGNED_OUT') {
           router.push('/login')
         }
       }
@@ -42,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe()
   }, [router, supabase.auth])
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = useCallback(async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -52,9 +50,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       return { error }
     }
-  }
+  }, [supabase.auth])
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = useCallback(async (email: string, password: string, fullName: string) => {
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -69,18 +67,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       return { error }
     }
-  }
+  }, [supabase.auth])
 
-  const signOut = async () => {
+  const signInWithGoogle = useCallback(async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+      return { error }
+    } catch (error) {
+      return { error }
+    }
+  }, [supabase.auth])
+
+  const signOut = useCallback(async () => {
     try {
       const { error } = await supabase.auth.signOut()
       return { error }
     } catch (error) {
       return { error }
     }
-  }
+  }, [supabase.auth])
 
-  const resetPassword = async (email: string) => {
+  const resetPassword = useCallback(async (email: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
@@ -89,9 +101,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       return { error }
     }
-  }
+  }, [supabase.auth])
 
-  const updateProfile = async (updates: { full_name?: string; avatar_url?: string }) => {
+  const updateProfile = useCallback(async (updates: { full_name?: string; avatar_url?: string }) => {
     try {
       const { error } = await supabase.auth.updateUser({
         data: updates,
@@ -100,13 +112,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       return { error }
     }
-  }
+  }, [supabase.auth])
 
   const value: AuthContextType = {
     user,
     loading,
     signIn,
     signUp,
+    signInWithGoogle,
     signOut,
     resetPassword,
     updateProfile,

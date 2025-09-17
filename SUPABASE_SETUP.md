@@ -50,6 +50,31 @@ In your Supabase Dashboard:
    - `http://localhost:3000/reset-password` (password reset)
    - `https://your-domain.com/reset-password` (password reset)
 
+### 4. Configure Google OAuth (Optional)
+
+To enable Google sign-in:
+
+1. **Create Google OAuth App**:
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project or select existing one
+   - Enable Google+ API
+   - Go to **Credentials** → **Create Credentials** → **OAuth 2.0 Client IDs**
+   - Set **Application type** to "Web application"
+   - Add **Authorized redirect URIs**:
+     - `https://your-project-ref.supabase.co/auth/v1/callback`
+   - Copy the **Client ID** and **Client Secret**
+
+2. **Configure in Supabase**:
+   - Go to your Supabase Dashboard
+   - Navigate to **Authentication** → **Providers**
+   - Enable **Google** provider
+   - Enter your Google **Client ID** and **Client Secret**
+   - Save the configuration
+
+3. **Test Google Sign-in**:
+   - The "Continue with Google" button will now work
+   - Users can sign in with their Google accounts
+
 ## 🗄️ Database Setup (Optional)
 
 If you want to store user profiles and meeting data, create these tables:
@@ -120,13 +145,13 @@ CREATE POLICY "Users can delete own meetings" ON meetings
 
 - ✅ **Email/Password**: Standard signup and login
 - ✅ **Password Reset**: Email-based password reset
+- ✅ **Google OAuth**: One-click Google sign-in
 - ✅ **Protected Routes**: Automatic redirect to login
 - ✅ **Session Management**: Persistent sessions
 - ✅ **User Profile**: Full name and avatar support
 
 ### Future Auth Methods (Easy to Add)
 
-- 🔄 **Google OAuth**: One-click Google sign-in
 - 🔄 **GitHub OAuth**: Developer-friendly sign-in
 - 🔄 **Magic Links**: Passwordless authentication
 - 🔄 **Phone Auth**: SMS-based authentication

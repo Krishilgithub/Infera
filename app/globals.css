@@ -4,48 +4,100 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    /* INFERA Brand Colors (From Logo) - Use for accents, not text backgrounds */
+    --brand-gradient: linear-gradient(135deg, #e935d1 0%, #d91a7a 50%, #c41e3a 100%);
+    --brand-primary: #d91a7a;
+    /* Main red/pink from logo */
+    --brand-accent: #e935d1;
+    /* Bright pink accent */
+    --brand-secondary: #c41e3a;
+    /* Deep red accent */
+
+    /* Surface Colors (The "Paper") - High contrast foundations */
+    --surface-light: #ffffff;
+    --surface-muted: #f8fafc;
+    /* Very light gray for subtle backgrounds */
+    --surface-elevated: #ffffff;
+    /* For cards and elevated elements */
+
+    /* Text Colors (The "Ink") - Optimized for readability */
+    --text-primary: #0f172a;
+    /* Very dark for high-emphasis text */
+    --text-secondary: #475569;
+    /* Medium gray for less important text */
+    --text-tertiary: #94a3b8;
+    /* Light gray for captions/hints */
+
+    /* Interactive Elements */
+    --border-light: #e2e8f0;
+    --border-muted: #cbd5e1;
+    --focus-ring: #e935d1;
+
+    /* Semantic Colors */
+    --success: #059669;
+    --warning: #d97706;
+    --error: #dc2626;
+    --info: #0284c7;
+
+    /* Component Variables - Light Mode */
+    --background: var(--surface-light);
+    --foreground: var(--text-primary);
+    --muted: var(--surface-muted);
+    --muted-foreground: var(--text-secondary);
+    --card: var(--surface-elevated);
+    --card-foreground: var(--text-primary);
+    --popover: var(--surface-elevated);
+    --popover-foreground: var(--text-primary);
+    --border: var(--border-light);
+    --input: var(--border-light);
+    --primary: var(--brand-primary);
+    --primary-foreground: var(--surface-light);
+    --secondary: var(--surface-muted);
+    --secondary-foreground: var(--text-primary);
+    --accent: var(--brand-accent);
+    --accent-foreground: var(--surface-light);
+    --destructive: var(--error);
+    --destructive-foreground: var(--surface-light);
+    --ring: var(--focus-ring);
+    --radius: 0.75rem;
   }
 
+  /* Dark Mode Overrides - Systematic color role swapping */
+  [data-theme='dark'],
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
+    /* Dark Surface Colors */
+    --surface-light: #0f172a;
+    /* Deep dark, not pure black */
+    --surface-muted: #1e293b;
+    --surface-elevated: #334155;
+
+    /* Dark Text Colors */
+    --text-primary: #f8fafc;
+    /* Bright for high-emphasis on dark */
+    --text-secondary: #cbd5e1;
+    /* Muted for less important on dark */
+    --text-tertiary: #64748b;
+    /* Darker for captions on dark */
+
+    /* Update Component Variables for Dark Mode */
+    --background: var(--surface-light);
+    --foreground: var(--text-primary);
+    --muted: var(--surface-muted);
+    --muted-foreground: var(--text-secondary);
+    --card: var(--surface-elevated);
+    --card-foreground: var(--text-primary);
+    --popover: var(--surface-elevated);
+    --popover-foreground: var(--text-primary);
+    --border: #475569;
+    --input: #475569;
+    --secondary: var(--surface-muted);
+    --secondary-foreground: var(--text-primary);
+
+    /* Brand colors remain consistent for recognition */
+    --primary: var(--brand-primary);
+    --primary-foreground: var(--surface-light);
+    --accent: var(--brand-accent);
+    --accent-foreground: var(--surface-light);
   }
 }
 
@@ -53,9 +105,49 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Typography Hierarchy - Clear visual distinction */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  p,
+  span,
+  div {
+    color: var(--text-secondary);
+  }
+
+  /* Links - Clear identification */
+  a {
+    color: var(--brand-primary);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    transition: text-decoration-color 0.2s ease;
+  }
+
+  a:hover {
+    text-decoration-color: var(--brand-primary);
+  }
+
+  /* Focus states for accessibility */
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
   }
 }
 
@@ -63,16 +155,72 @@
   .container {
     @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
   }
-  
+
   .section-padding {
     @apply py-16 md:py-24;
   }
-  
+
+  /* Brand gradient text - for headings and emphasis */
   .gradient-text {
-    @apply bg-gradient-to-r from-navy-600 to-teal-600 bg-clip-text text-transparent;
+    background: var(--brand-gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
   }
-  
+
+  /* Subtle background gradients - never with text directly on them */
   .gradient-bg {
-    @apply bg-gradient-to-br from-navy-50 to-teal-50 dark:from-navy-900 dark:to-teal-900;
+    background: linear-gradient(135deg, #fef7ff 0%, #fff1f2 100%);
+  }
+
+  [data-theme='dark'] .gradient-bg,
+  .dark .gradient-bg {
+    background: linear-gradient(135deg, #1e1b2e 0%, #2d1b1b 100%);
+  }
+
+  /* Button variants with proper contrast */
+  .btn-primary {
+    background: var(--brand-gradient);
+    color: var(--surface-light);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 25px rgba(233, 53, 209, 0.3);
+  }
+
+  .btn-secondary {
+    background: var(--surface-elevated);
+    color: var(--text-primary);
+    border: 2px solid var(--border-muted);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--brand-primary);
+    background: var(--muted);
+  }
+
+  /* Card component with proper elevation */
+  .card-elevated {
+    background: var(--card);
+    color: var(--card-foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s ease;
+  }
+
+  .card-elevated:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   }
 }
