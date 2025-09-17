@@ -24,8 +24,8 @@ export default function Header() {
 	];
 
 	return (
-		<header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-			<div className="container flex h-16 items-center justify-between">
+		   <header className="fixed top-4 left-1/2 z-50 w-[95vw] max-w-4xl -translate-x-1/2 rounded-2xl bg-background/80 shadow-xl border border-gray-200 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 transition-all">
+			   <div className="flex h-16 items-center justify-between px-6">
 				{/* Logo */}
 				<Link href="/" className="flex items-center space-x-2">
 					<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-infera-600 to-rose-600">
@@ -101,7 +101,7 @@ export default function Header() {
 					initial={{ opacity: 0, height: 0 }}
 					animate={{ opacity: 1, height: "auto" }}
 					exit={{ opacity: 0, height: 0 }}
-					className="md:hidden border-t bg-background"
+					   className="md:hidden bg-background"
 				>
 					<div className="container py-4 space-y-4">
 						{navigation.map((item) => (
@@ -115,7 +115,7 @@ export default function Header() {
 							</Link>
 						))}
 
-						<div className="flex flex-col space-y-2 pt-4 border-t">
+						   <div className="flex flex-col space-y-2 pt-4">
 							<Link href="/login" onClick={() => setIsMenuOpen(false)}>
 								<Button variant="ghost" className="w-full justify-start">
 									Sign In
