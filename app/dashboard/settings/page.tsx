@@ -77,25 +77,15 @@ export default function SettingsPage() {
 			<div className="max-w-4xl mx-auto">
 				{/* Header */}
 				<div className="flex items-center justify-between mb-8">
-					<div className="flex items-center space-x-4">
-						<Button
-							variant="ghost"
-							onClick={() => router.push("/dashboard")}
-							className="text-gray-500 hover:text-gray-700"
-						>
-							<ArrowLeft className="mr-2 h-4 w-4" />
-							Back to Dashboard
-						</Button>
-						<div>
-							<h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-							<p className="text-gray-600 mt-1">
-								Customize your Infera experience
-							</p>
-						</div>
+					<div>
+						<h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+						<p className="text-gray-600 mt-1">
+							Customize your Infera experience
+						</p>
 					</div>
 					<Button
 						onClick={handleSave}
-						className="bg-blue-600 hover:bg-blue-700 text-white"
+						className="bg-purple-500 hover:bg-purple-600 text-white border-0"
 					>
 						<Save className="mr-2 h-4 w-4" />
 						Save Changes
@@ -142,7 +132,7 @@ export default function SettingsPage() {
 												}
 												className="sr-only peer"
 											/>
-											<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+											<div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gray-700"></div>
 										</label>
 									</div>
 								))}
@@ -184,7 +174,7 @@ export default function SettingsPage() {
 												}
 												className="sr-only peer"
 											/>
-											<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+											<div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gray-700"></div>
 										</label>
 									</div>
 								))}
@@ -239,7 +229,7 @@ export default function SettingsPage() {
 													}
 													className="sr-only peer"
 												/>
-												<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+												<div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gray-700"></div>
 											</label>
 										)}
 									</div>
@@ -280,7 +270,7 @@ export default function SettingsPage() {
 												}
 												className="sr-only peer"
 											/>
-											<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+											<div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gray-700"></div>
 										</label>
 									</div>
 								))}

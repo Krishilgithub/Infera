@@ -132,29 +132,29 @@ export default function MeetingInterface() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className="relative bg-gradient-to-br from-navy-400 to-teal-400 rounded-lg overflow-hidden"
+                className="relative bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md"
               >
                 {participant.isVideoOn ? (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-white font-medium text-lg">
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <span className="text-gray-700 font-medium text-lg">
                       {participant.name}
                     </span>
                   </div>
                 ) : (
-                  <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <div className="w-full h-full bg-gray-50 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="w-16 h-16 bg-gradient-to-br from-navy-600 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <div className="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center mx-auto mb-2">
                         <span className="text-white font-bold text-xl">
                           {participant.name.split(' ').map(n => n[0]).join('')}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground">{participant.name}</p>
+                      <p className="text-sm text-gray-600">{participant.name}</p>
                     </div>
                   </div>
                 )}
                 
                 {/* Participant info overlay */}
-                <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2">
+                <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">{participant.name}</p>

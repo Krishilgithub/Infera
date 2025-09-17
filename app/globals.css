@@ -129,6 +129,15 @@
     text-decoration-color: var(--brand-primary);
   }
 
+  /* Remove underline from sidebar navigation links */
+  nav a {
+    text-decoration: none !important;
+  }
+
+  nav a:hover {
+    text-decoration: none !important;
+  }
+
   /* Focus states for accessibility */
   button:focus-visible,
   input:focus-visible,

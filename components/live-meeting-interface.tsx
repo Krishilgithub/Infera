@@ -105,31 +105,31 @@ const LiveMeetingInterface: React.FC = () => {
 	};
 
 	const SummaryModal = () => (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-			<div className="bg-card border border-border rounded-lg shadow-xl max-w-md w-full">
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+			<div className="bg-white border border-gray-200 rounded-lg shadow-2xl max-w-md w-full">
 				<div className="p-6 text-center">
 					<div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
 						<CheckCircle size={24} className="text-green-600" />
 					</div>
-					<h3 className="text-lg font-semibold text-foreground mb-2">
+					<h3 className="text-lg font-semibold text-gray-900 mb-2">
 						Meeting Summary Generated
 					</h3>
-					<p className="text-muted-foreground mb-6">
-						Your meeting summary and action items have been automatically
+					<p className="text-gray-600 mb-6">
+						Your meeting summary and task assignments have been automatically
 						generated and saved.
 					</p>
 					<div className="flex items-center space-x-3">
 						<Button
 							variant="outline"
 							onClick={() => setShowSummaryModal(false)}
-							className="flex-1"
+							className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
 						>
 							Close
 						</Button>
 						<Button
 							variant="default"
 							onClick={() => router.push("/dashboard/meeting-details")}
-							className="flex-1"
+							className="flex-1 bg-gray-700 hover:bg-gray-800 text-white"
 						>
 							View Details
 						</Button>
@@ -148,36 +148,36 @@ const LiveMeetingInterface: React.FC = () => {
 							name: "Sarah Johnson",
 							role: "Product Manager",
 							isHost: true,
-							bgColor: "bg-gray-50",
-							borderColor: "border-gray-200",
+							bgColor: "bg-white",
+							borderColor: "border-gray-300",
 						},
 						{
 							name: "Michael Chen",
 							role: "Engineering Lead",
 							isHost: false,
-							bgColor: "bg-blue-50",
-							borderColor: "border-blue-200",
+							bgColor: "bg-gray-50",
+							borderColor: "border-gray-200",
 						},
 						{
 							name: "Emily Rodriguez",
 							role: "UX Designer",
 							isHost: false,
-							bgColor: "bg-green-50",
-							borderColor: "border-green-200",
+							bgColor: "bg-white",
+							borderColor: "border-gray-200",
 						},
 						{
 							name: "David Kim",
 							role: "Data Analyst",
 							isHost: false,
-							bgColor: "bg-purple-50",
-							borderColor: "border-purple-200",
+							bgColor: "bg-gray-50",
+							borderColor: "border-gray-200",
 						},
 						{
 							name: "Lisa Thompson",
 							role: "Marketing Director",
 							isHost: false,
-							bgColor: "bg-indigo-50",
-							borderColor: "border-indigo-200",
+							bgColor: "bg-white",
+							borderColor: "border-gray-200",
 						},
 					].map((participant, i) => (
 						<div key={i} className="relative group">
@@ -213,8 +213,8 @@ const LiveMeetingInterface: React.FC = () => {
 								{/* Avatar and content */}
 								<div className="w-full h-full flex flex-col items-center justify-center p-4 relative">
 									{/* Profile avatar */}
-									<div className="relative z-10 w-20 h-20 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-white shadow-lg mb-3">
-										<span className="text-infera-700 font-bold text-xl">
+									<div className="relative z-10 w-20 h-20 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-gray-300 shadow-lg mb-3">
+										<span className="text-gray-700 font-bold text-xl">
 											{participant.name
 												.split(" ")
 												.map((n) => n[0])
@@ -224,10 +224,10 @@ const LiveMeetingInterface: React.FC = () => {
 
 									{/* Participant info */}
 									<div className="relative z-10 text-center">
-										<h3 className="text-infera-800 font-semibold text-sm mb-1">
+										<h3 className="text-gray-800 font-semibold text-sm mb-1">
 											{participant.name}
 										</h3>
-										<p className="text-infera-600 text-xs">
+										<p className="text-gray-600 text-xs">
 											{participant.role}
 										</p>
 									</div>
@@ -246,17 +246,8 @@ const LiveMeetingInterface: React.FC = () => {
 									)}
 								</div>
 
-								{/* Connection quality indicator */}
-								<div className="absolute bottom-3 left-3 z-10">
-									<div className="flex space-x-1">
-										<div className="w-1 h-4 bg-infera-400 rounded-full"></div>
-										<div className="w-1 h-3 bg-infera-500 rounded-full"></div>
-										<div className="w-1 h-2 bg-infera-600 rounded-full"></div>
-									</div>
-								</div>
-
 								{/* Hover overlay */}
-								<div className="absolute inset-0 bg-infera-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+								<div className="absolute inset-0 bg-gray-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 							</div>
 						</div>
 					))}
@@ -394,7 +385,7 @@ const LiveMeetingInterface: React.FC = () => {
 		<Card className="h-full bg-white shadow-lg border-gray-200 flex flex-col">
 			<CardHeader className="pb-3 flex-shrink-0">
 				<div className="flex items-center justify-between">
-					<CardTitle className="text-lg">Action Items</CardTitle>
+					<CardTitle className="text-lg">Task Assignments</CardTitle>
 					<Button variant="ghost" size="sm">
 						<Plus size={16} />
 					</Button>
@@ -554,7 +545,7 @@ const LiveMeetingInterface: React.FC = () => {
 											: "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
 									}`}
 								>
-									Actions
+									Tasks
 								</button>
 							</div>
 						</div>

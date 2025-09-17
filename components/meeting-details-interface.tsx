@@ -6,10 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
   Download, 
-  Share, 
-  Edit, 
   FileText, 
-  Mail, 
   Calendar, 
   Clock, 
   Users, 
@@ -135,7 +132,7 @@ const MeetingDetailsInterface: React.FC = () => {
     {
       speaker: "Sarah Johnson",
       timestamp: "2025-09-13T14:15:30Z",
-      content: "Excellent work everyone. Let's make sure we document these action items and schedule follow-up meetings to address the scalability concerns Michael mentioned.",
+      content: "Excellent work everyone. Let's make sure we document these task assignments and schedule follow-up meetings to address the scalability concerns Michael mentioned.",
       sentiment: 0.75,
       emotion: "positive"
     }
@@ -230,7 +227,7 @@ const MeetingDetailsInterface: React.FC = () => {
       icon: 'Bug',
       status: 'connected',
       lastSync: "2025-09-13T14:25:00Z",
-      description: 'Action items synced as Jira tickets'
+      description: 'Task assignments synced as Jira tickets'
     },
     {
       id: 'salesforce-001',
@@ -260,23 +257,6 @@ const MeetingDetailsInterface: React.FC = () => {
     setTimeout(() => {
       alert('Meeting transcript exported as PDF successfully!');
     }, 1000);
-  };
-
-  const handleExportEmail = () => {
-    console.log('Sending meeting summary via email...');
-    setTimeout(() => {
-      alert('Meeting summary sent to all participants!');
-    }, 1000);
-  };
-
-  const handleEditMeeting = () => {
-    console.log('Opening meeting editor...');
-  };
-
-  const handleShareMeeting = () => {
-    console.log('Sharing meeting...');
-    navigator.clipboard?.writeText(window.location?.href || '');
-    alert('Meeting link copied to clipboard!');
   };
 
   const handleJumpToMarker = (marker: TimelineMarker) => {
@@ -348,18 +328,6 @@ const MeetingDetailsInterface: React.FC = () => {
           </div>
           
           <div className="flex items-center space-x-3">
-            <Button variant="outline" size="sm" onClick={handleEditMeeting}>
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleShareMeeting}>
-              <Share className="h-4 w-4 mr-2" />
-              Share
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleExportEmail}>
-              <Mail className="h-4 w-4 mr-2" />
-              Email
-            </Button>
             <Button variant="default" size="sm" onClick={handleExportPDF}>
               <Download className="h-4 w-4 mr-2" />
               Export PDF
@@ -513,7 +481,7 @@ const MeetingDetailsInterface: React.FC = () => {
     <Card className="h-full">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Action Items</CardTitle>
+          <CardTitle className="text-lg">Task Assignments</CardTitle>
           <Button variant="ghost" size="sm">
             <Plus className="h-4 w-4" />
           </Button>
@@ -585,7 +553,7 @@ const MeetingDetailsInterface: React.FC = () => {
                 selectedTab === 'actionItems' ? 'bg-gray-100 text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               )}
             >
-              Action Items
+              Task Assignments
             </button>
           </div>
 

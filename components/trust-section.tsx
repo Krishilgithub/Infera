@@ -17,7 +17,7 @@ const testimonials = [
     name: 'Michael Rodriguez',
     role: 'CEO',
     company: 'StartupXYZ',
-    content: 'The automated summaries save us hours every week. Action items are never missed anymore.',
+    content: 'The automated summaries save us hours every week. Task assignments are never missed anymore.',
     rating: 5,
     avatar: 'MR'
   },

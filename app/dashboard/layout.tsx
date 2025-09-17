@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import DashboardSidebar from "@/components/dashboard-sidebar";
-import DashboardHeader from "@/components/dashboard-header";
 import { useAuth } from "@/contexts/auth-context";
 import { MeetingProvider } from "@/contexts/meeting-context";
 
@@ -15,18 +14,6 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { user, loading } = useAuth()
   const router = useRouter()
-
-  // Set sidebar open by default on large screens and keep in sync on resize
-  useEffect(() => {
-    const checkScreenSize = () => {
-      if (typeof window !== 'undefined') {
-        setSidebarOpen(window.innerWidth >= 1024)
-      }
-    }
-    checkScreenSize()
-    window.addEventListener('resize', checkScreenSize)
-    return () => window.removeEventListener('resize', checkScreenSize)
-  }, [])
 
   useEffect(() => {
     if (!loading && !user) {
@@ -52,13 +39,8 @@ export default function DashboardLayout({
 		<MeetingProvider>
 			<div className="min-h-screen gradient-bg">
 				<DashboardSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-				<div
-					className={`min-h-screen transition-all duration-300 ${
-						sidebarOpen ? "lg:ml-64" : "ml-0"
-					}`}
-				>
-					<DashboardHeader setSidebarOpen={setSidebarOpen} />
-					<main className="pt-4 pb-8 px-6 lg:px-12">{children}</main>
+				<div className="ml-16 min-h-screen transition-all duration-300">
+					<main className="pt-8 pb-8 px-6 lg:px-12">{children}</main>
 				</div>
 			</div>
 		</MeetingProvider>

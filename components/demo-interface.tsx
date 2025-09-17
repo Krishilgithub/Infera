@@ -290,12 +290,12 @@ export default function DemoInterface() {
                   </CardContent>
                 </Card>
 
-                {/* Action Items */}
+                {/* Task Assignments */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center">
                       <CheckCircle className="mr-2 h-5 w-5" />
-                      Action Items
+                      Task Assignments
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -348,7 +348,7 @@ export default function DemoInterface() {
                         <span className="text-sm font-medium">4</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Action Items</span>
+                        <span className="text-sm text-muted-foreground">Task Assignments</span>
                         <span className="text-sm font-medium">{mockActionItems.length}</span>
                       </div>
                       <div className="flex justify-between">

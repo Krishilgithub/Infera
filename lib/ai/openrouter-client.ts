@@ -159,7 +159,7 @@ class OpenRouterClient {
 					{
 						role: "system",
 						content: `You are an expert meeting analyst. Extract key insights from meeting transcripts and return JSON with:
-            - action_items: array of specific action items mentioned
+            - task_assignments: array of specific task assignments mentioned
             - decisions: array of decisions made
             - risks: array of risks or concerns raised
             - key_points: array of important discussion points

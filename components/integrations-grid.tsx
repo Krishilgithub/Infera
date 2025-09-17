@@ -17,7 +17,7 @@ const integrations = [
   },
   {
     name: 'Slack',
-    description: 'Share meeting summaries and action items directly in your team channels.',
+    description: 'Share meeting summaries and task assignments directly in your team channels.',
     logo: '💬',
     category: 'Communication',
     features: ['Summary sharing', 'Action notifications', 'Team updates'],
@@ -57,7 +57,7 @@ const integrations = [
   },
   {
     name: 'Jira',
-    description: 'Create tickets and track project progress from meeting action items.',
+    description: 'Create tickets and track project progress from meeting task assignments.',
     logo: '📋',
     category: 'Project Management',
     features: ['Ticket creation', 'Progress tracking', 'Sprint updates'],
@@ -73,7 +73,7 @@ const integrations = [
   },
   {
     name: 'Asana',
-    description: 'Create tasks and projects directly from meeting action items.',
+    description: 'Create tasks and projects directly from meeting task assignments.',
     logo: '✅',
     category: 'Project Management',
     features: ['Task creation', 'Project updates', 'Team assignments'],

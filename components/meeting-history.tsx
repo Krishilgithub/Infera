@@ -90,7 +90,7 @@ const filters = [
   { label: 'This Week', value: 'week', count: 3 },
   { label: 'This Month', value: 'month', count: meetings.length },
   { label: 'Completed', value: 'completed', count: meetings.length },
-  { label: 'With Action Items', value: 'actions', count: 4 }
+  { label: 'With Task Assignments', value: 'actions', count: 4 }
 ]
 
 export default function MeetingHistory() {
