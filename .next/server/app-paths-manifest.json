@@ -1,32 +1,6 @@
 {
-<<<<<<< HEAD
-  "/login/page": "app/login/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/dashboard/meeting-details/page": "app/dashboard/meeting-details/page.js",
-  "/dashboard/live/page": "app/dashboard/live/page.js",
-  "/dashboard/meeting/page": "app/dashboard/meeting/page.js"
-=======
-  "/_not-found": "app/_not-found.js",
-  "/api/health/route": "app/api/health/route.js",
-  "/auth/auth-code-error/page": "app/auth/auth-code-error/page.js",
-  "/auth/callback/route": "app/auth/callback/route.js",
-  "/forgot-password/page": "app/forgot-password/page.js",
-  "/integrations/page": "app/integrations/page.js",
-  "/features/page": "app/features/page.js",
-  "/demo/page": "app/demo/page.js",
-  "/login/page": "app/login/page.js",
-  "/logout/page": "app/logout/page.js",
   "/page": "app/page.js",
-  "/pricing/page": "app/pricing/page.js",
-  "/signup/page": "app/signup/page.js",
-  "/reset-password/page": "app/reset-password/page.js",
-  "/dashboard/live/page": "app/dashboard/live/page.js",
-  "/dashboard/profile/page": "app/dashboard/profile/page.js",
-  "/dashboard/history/page": "app/dashboard/history/page.js",
-  "/dashboard/help/page": "app/dashboard/help/page.js",
-  "/dashboard/schedule/page": "app/dashboard/schedule/page.js",
-  "/dashboard/settings/page": "app/dashboard/settings/page.js",
+  "/login/page": "app/login/page.js",
   "/dashboard/meeting/page": "app/dashboard/meeting/page.js",
   "/dashboard/page": "app/dashboard/page.js"
->>>>>>> b99a0f31dadd2fe16aa565862e14769b0f685c99
 }
