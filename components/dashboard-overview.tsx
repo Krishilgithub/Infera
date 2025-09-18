@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
@@ -27,7 +27,8 @@ import {
   TrendingDown,
   Minus,
   Eye,
-  Play
+  Play,
+  Trash
 } from 'lucide-react'
 
 // Interface for KPI Card props
@@ -75,6 +76,8 @@ const RecentMeetingCard: React.FC<RecentMeetingCardProps> = ({ meeting }) => {
     ongoing: 'bg-orange-50 text-orange-700 border-orange-200',
     cancelled: 'bg-red-50 text-red-700 border-red-200'
   }
+
+  /* Action handlers removed from RecentMeetingCard. Actions are defined in DashboardOverview. */
 
   return (
     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100 hover:shadow-md transition-all duration-200">
@@ -172,6 +175,9 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, subtitle, icon: Icon, t
 export default function DashboardOverview() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [activeTab, setActiveTab] = useState('recent-meetings')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [dashboardData, setDashboardData] = useState<any | null>(null)
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -180,6 +186,136 @@ export default function DashboardOverview() {
 
     return () => clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    async function loadDashboard() {
+      try {
+        setLoading(true)
+        setError(null)
+        const res = await fetch('/api/meetings/dashboard')
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}))
+          throw new Error(body?.error || res.statusText)
+        }
+        const data = await res.json()
+        setDashboardData(data)
+      } catch (e: any) {
+        setError(e?.message || 'Failed to load dashboard')
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadDashboard()
+  }, [])
+
+  async function startNewMeeting() {
+    try {
+      const title = prompt('Enter meeting title', 'Instant Meeting')
+      if (title === null) return
+      const res = await fetch('/api/meetings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title })
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        alert('Failed to create meeting: ' + (err?.error || res.statusText))
+        return
+      }
+      const meeting = await res.json()
+      // Navigate directly to meeting room
+      if (meeting?.meeting_code) {
+        window.location.href = `/meeting/${encodeURIComponent(meeting.meeting_code)}`
+        return
+      }
+      alert(`Meeting created. Code: ${meeting.meeting_code || 'N/A'}`)
+    } catch (e: any) {
+      alert('Error: ' + e?.message)
+    }
+  }
+
+  async function scheduleMeeting() {
+    try {
+      const title = prompt('Enter meeting title', 'Scheduled Meeting')
+      if (title === null) return
+      const when = prompt('Enter scheduled time (ISO, e.g. 2025-09-18T19:30:00Z)')
+      if (!when) return
+      const res = await fetch('/api/meetings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, scheduled_at: when })
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        alert('Failed to schedule meeting: ' + (err?.error || res.statusText))
+        return
+      }
+      const meeting = await res.json()
+      alert(`Meeting scheduled. Code: ${meeting.meeting_code}`)
+      // refresh dashboard
+      const refreshed = await fetch('/api/meetings/dashboard')
+      if (refreshed.ok) setDashboardData(await refreshed.json())
+    } catch (e: any) {
+      alert('Error: ' + e?.message)
+    }
+  }
+
+  async function deleteCompletedMeeting(id: string) {
+    if (!confirm('Delete this completed meeting?')) return
+    const res = await fetch(`/api/meetings/${id}`, { method: 'DELETE' })
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      alert('Delete failed: ' + (body?.error || res.statusText))
+      return
+    }
+    // refresh dashboard
+    const refreshed = await fetch('/api/meetings/dashboard')
+    if (refreshed.ok) setDashboardData(await refreshed.json())
+  }
+
+  async function startScheduledMeeting(id: string) {
+    try {
+      const res = await fetch(`/api/meetings/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'start' })
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        alert('Failed to start meeting: ' + (body?.error || res.statusText))
+        return
+      }
+      if (body?.meeting_code) {
+        window.location.href = `/meeting/${encodeURIComponent(body.meeting_code)}`
+        return
+      }
+      const refreshed = await fetch('/api/meetings/dashboard')
+      if (refreshed.ok) setDashboardData(await refreshed.json())
+    } catch (e: any) {
+      alert('Error: ' + e?.message)
+    }
+  }
+
+  async function joinOngoingMeeting(meeting: any) {
+    try {
+      const code = meeting?.meeting_code
+      if (code) {
+        window.location.href = `/meeting/${encodeURIComponent(code)}`
+        return
+      }
+      const res = await fetch(`/api/meetings/${encodeURIComponent(meeting.id)}`)
+      if (res.ok) {
+        const data = await res.json().catch(() => null)
+        if (data?.meeting_code) {
+          window.location.href = `/meeting/${encodeURIComponent(data.meeting_code)}`
+          return
+        }
+      }
+      alert('Unable to resolve meeting code to join.')
+    } catch (e: any) {
+      alert('Error: ' + e?.message)
+    }
+  }
 
   // KPI data
   const kpiData: KPICardProps[] = [
@@ -345,11 +481,91 @@ export default function DashboardOverview() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {recentMeetings.slice(0, 4).map((meeting) => (
-                  <RecentMeetingCard key={meeting.id} meeting={meeting} />
-                ))}
-              </div>
+              {loading && <p className="text-sm text-gray-600">Loading...</p>}
+              {error && <p className="text-sm text-red-600">{error}</p>}
+              {!loading && !error && dashboardData && (
+                <div className="space-y-6">
+                  {/* Upcoming */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-semibold text-gray-800">Upcoming</h4>
+                      <span className="text-xs text-gray-500">{dashboardData.upcoming.length} meetings</span>
+                    </div>
+                    {dashboardData.upcoming.length === 0 ? (
+                      <p className="text-sm text-gray-500">No upcoming meetings</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {dashboardData.upcoming.slice(0, 5).map((m: any) => (
+                          <div key={m.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                            <div>
+                              <div className="font-medium text-gray-900">{m.title}</div>
+                              <div className="text-xs text-gray-600">{m.scheduled_at ? new Date(m.scheduled_at).toLocaleString() : ''}</div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <button onClick={() => startScheduledMeeting(m.id)} className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-700">Start</button>
+                              <span className="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">upcoming</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Ongoing */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-semibold text-gray-800">Ongoing</h4>
+                      <span className="text-xs text-gray-500">{dashboardData.ongoing.length} meetings</span>
+                    </div>
+                    {dashboardData.ongoing.length === 0 ? (
+                      <p className="text-sm text-gray-500">No ongoing meetings</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {dashboardData.ongoing.slice(0, 5).map((m: any) => (
+                          <div key={m.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                            <div>
+                              <div className="font-medium text-gray-900">{m.title}</div>
+                              <div className="text-xs text-gray-600">Started {m.started_at ? new Date(m.started_at).toLocaleString() : ''}</div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <button onClick={() => joinOngoingMeeting(m)} className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-700">Join</button>
+                              <span className="text-xs px-2 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200">ongoing</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Completed */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-semibold text-gray-800">Completed</h4>
+                      <span className="text-xs text-gray-500">{dashboardData.completed.length} in last 30 days</span>
+                    </div>
+                    {dashboardData.completed.length === 0 ? (
+                      <p className="text-sm text-gray-500">No completed meetings</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {dashboardData.completed.slice(0, 5).map((m: any) => (
+                          <div key={m.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                            <div>
+                              <div className="font-medium text-gray-900">{m.title}</div>
+                              <div className="text-xs text-gray-600">Ended {m.ended_at ? new Date(m.ended_at).toLocaleString() : ''} • {m.duration_minutes || 0} min</div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <button onClick={() => deleteCompletedMeeting(m.id)} className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-700 flex items-center">
+                                <Trash size={12} className="mr-1" /> Delete
+                              </button>
+                              <span className="text-xs px-2 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">completed</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )
@@ -442,13 +658,11 @@ export default function DashboardOverview() {
           </div>
 
           <div className="flex items-center space-x-3">
-            <Link href="/dashboard/meeting">
-              <Button className="bg-gray-700 hover:bg-gray-800 text-white border-0">
-                <Video className="mr-2 h-4 w-4" />
-                Start Meeting
-              </Button>
-            </Link>
-            <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
+            <Button onClick={startNewMeeting} className="bg-gray-700 hover:bg-gray-800 text-white border-0">
+              <Video className="mr-2 h-4 w-4" />
+              Start Meeting
+            </Button>
+            <Button onClick={scheduleMeeting} variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
               <Calendar className="mr-2 h-4 w-4" />
               Schedule
             </Button>

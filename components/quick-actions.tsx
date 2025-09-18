@@ -25,20 +25,109 @@ interface QuickActionsProps {
 }
 
 const QuickActions: React.FC<QuickActionsProps> = ({ className = "" }) => {
+  async function startNewMeeting() {
+    try {
+      const title = prompt('Enter meeting title', 'Instant Meeting');
+      if (title === null) return;
+
+      // Create the meeting (instant)
+      const res = await fetch('/api/meetings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert('Failed to create meeting: ' + (err?.error || res.statusText));
+        return;
+      }
+      const meeting = await res.json();
+      // Navigate to the meeting room using the unique code
+      if (meeting?.meeting_code) {
+        window.location.href = `/meeting/${encodeURIComponent(meeting.meeting_code)}`;
+      } else {
+        alert('Meeting created but no code returned.');
+      }
+    } catch (e: any) {
+      alert('Error: ' + e?.message);
+    }
+  }
+
+  async function scheduleMeeting() {
+    try {
+      const title = prompt('Enter meeting title', 'Scheduled Meeting');
+      if (title === null) return;
+      const when = prompt('Enter scheduled time (ISO, e.g. 2025-09-18T19:30:00Z)');
+      if (!when) return;
+
+      const res = await fetch('/api/meetings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, scheduled_at: when }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert('Failed to schedule meeting: ' + (err?.error || res.statusText));
+        return;
+      }
+      const meeting = await res.json();
+      alert(`Meeting scheduled. Code: ${meeting.meeting_code}`);
+    } catch (e: any) {
+      alert('Error: ' + e?.message);
+    }
+  }
+
+  async function inviteTeam() {
+    try {
+      const code = prompt('Enter meeting code to invite into');
+      if (!code) return;
+
+      // Resolve meeting by code
+      const resMeeting = await fetch(`/api/meetings?code=${encodeURIComponent(code)}`);
+      if (!resMeeting.ok) {
+        alert('Meeting not found');
+        return;
+      }
+      const meeting = await resMeeting.json();
+
+      const emailsCsv = prompt('Enter emails separated by comma');
+      if (!emailsCsv) return;
+      const emails = emailsCsv
+        .split(',')
+        .map(e => e.trim())
+        .filter(Boolean);
+      if (emails.length === 0) return;
+
+      const resInvite = await fetch(`/api/meetings/${meeting.id}/invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emails }),
+      });
+      const body = await resInvite.json().catch(() => ({}));
+      if (!resInvite.ok) {
+        alert('Invite failed: ' + (body?.error || resInvite.statusText));
+        return;
+      }
+      alert(body?.message || 'Invitations sent');
+    } catch (e: any) {
+      alert('Error: ' + e?.message);
+    }
+  }
+
   const actions: QuickActionItem[] = [
     {
       title: "Start New Meeting",
       description: "Begin an instant meeting with transcription",
       icon: Video,
       color: "default",
-      link: "/dashboard/meeting"
+      action: startNewMeeting
     },
     {
       title: "Schedule Meeting",
       description: "Plan and invite participants",
       icon: Calendar,
       color: "outline",
-      action: () => console.log('Schedule meeting modal')
+      action: scheduleMeeting
     },
     {
       title: "Search Transcripts",
@@ -52,7 +141,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({ className = "" }) => {
       description: "Add team members to your workspace",
       icon: UserPlus,
       color: "outline",
-      action: () => console.log('Invite modal')
+      action: inviteTeam
     }
   ];
 
