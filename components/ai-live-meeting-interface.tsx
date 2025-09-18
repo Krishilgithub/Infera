@@ -38,7 +38,6 @@ import {
 	Clock,
 } from "lucide-react";
 import { useTranscription } from "@/hooks/use-transcription";
-import { useMeeting } from "@/contexts/meeting-context";
 import {
 	useSentimentAnalysis,
 	useInsightExtraction,
@@ -79,17 +78,6 @@ interface JargonTerm {
 }
 
 export default function AILiveMeetingInterface() {
-	// Meeting context integration
-	const {
-		currentMeeting,
-		participants: contextParticipants,
-		isMuted,
-		isVideoOff,
-		toggleMute,
-		toggleVideo,
-		meetingCode
-	} = useMeeting();
-
 	const [participants, setParticipants] = useState<MeetingParticipant[]>([
 		{
 			id: "1",
@@ -129,22 +117,6 @@ export default function AILiveMeetingInterface() {
 	const [selectedJargon, setSelectedJargon] = useState<JargonTerm | null>(null);
 	const [showInsights, setShowInsights] = useState(false);
 	const [showTranscript, setShowTranscript] = useState(true);
-
-	// Sync participants from meeting context
-	useEffect(() => {
-		if (contextParticipants && contextParticipants.length > 0) {
-			const updatedParticipants = contextParticipants.map(p => ({
-				id: p.id,
-				name: p.name,
-				role: p.role,
-				video: p.video,
-				audio: p.audio,
-				avatar: p.avatar || "👤",
-				isCurrentUser: p.isCurrentUser || false,
-			}));
-			setParticipants(updatedParticipants);
-		}
-	}, [contextParticipants]);
 
 	// AI Hooks
 	const {
@@ -405,12 +377,15 @@ export default function AILiveMeetingInterface() {
 							<CardContent className="p-4">
 								<div className="flex items-center justify-center gap-4">
 									<Button
-										variant={!isMuted ? "default" : "destructive"}
+										variant={
+											participants.find((p) => p.isCurrentUser)?.audio
+												? "default"
+												: "destructive"
+										}
 										size="lg"
 										className="rounded-full w-12 h-12"
-										onClick={toggleMute}
 									>
-										{!isMuted ? (
+										{participants.find((p) => p.isCurrentUser)?.audio ? (
 											<Mic className="w-5 h-5" />
 										) : (
 											<MicOff className="w-5 h-5" />
@@ -418,12 +393,15 @@ export default function AILiveMeetingInterface() {
 									</Button>
 
 									<Button
-										variant={!isVideoOff ? "default" : "destructive"}
+										variant={
+											participants.find((p) => p.isCurrentUser)?.video
+												? "default"
+												: "destructive"
+										}
 										size="lg"
 										className="rounded-full w-12 h-12"
-										onClick={toggleVideo}
 									>
-										{!isVideoOff ? (
+										{participants.find((p) => p.isCurrentUser)?.video ? (
 											<Video className="w-5 h-5" />
 										) : (
 											<VideoOff className="w-5 h-5" />

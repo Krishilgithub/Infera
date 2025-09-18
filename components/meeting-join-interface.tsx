@@ -47,8 +47,7 @@ export default function MeetingJoinInterface() {
 				participantName.trim()
 			);
 			if (success) {
-				// Redirect to the actual meeting room with the code
-				router.push(`/meeting/${meetingCode.trim().toUpperCase()}`);
+				router.push("/dashboard/live");
 			} else {
 				setError("Invalid meeting code or unable to join meeting");
 			}
@@ -65,8 +64,7 @@ export default function MeetingJoinInterface() {
 
 		try {
 			const code = await createMeeting("New Meeting");
-			// Redirect to the actual meeting room with the generated code
-			router.push(`/meeting/${code}`);
+			router.push("/dashboard/live");
 		} catch (error) {
 			setError("Failed to create meeting. Please try again.");
 		} finally {

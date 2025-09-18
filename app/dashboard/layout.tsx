@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import DashboardSidebar from "@/components/dashboard-sidebar";
 import { useAuth } from "@/contexts/auth-context";
+import { MeetingProvider } from "@/contexts/meeting-context";
 
 export default function DashboardLayout({
 	children,
@@ -35,11 +36,13 @@ export default function DashboardLayout({
   }
 
 	return (
-		<div className="min-h-screen gradient-bg">
-			<DashboardSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-			<div className="ml-16 min-h-screen transition-all duration-300">
-				<main className="pt-8 pb-8 px-6 lg:px-12">{children}</main>
+		<MeetingProvider>
+			<div className="min-h-screen gradient-bg">
+				<DashboardSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+				<div className="ml-16 min-h-screen transition-all duration-300">
+					<main className="pt-8 pb-8 px-6 lg:px-12">{children}</main>
+				</div>
 			</div>
-		</div>
+		</MeetingProvider>
 	);
 }
