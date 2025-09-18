@@ -76,17 +76,10 @@ export default function RootLayout({
 		<html lang="en" suppressHydrationWarning>
 			<body className={inter.className}>
 				<AuthProvider>
-					<ThemeProvider
-						attribute="class"
-						defaultTheme="system"
-						enableSystem
-						disableTransitionOnChange
-					>
-						{children}
-						<Toaster />
-						<Analytics />
-						<SpeedInsights />
-					</ThemeProvider>
+					{children}
+					<Toaster />
+					<Analytics />
+					<SpeedInsights />
 				</AuthProvider>
 			</body>
 		</html>

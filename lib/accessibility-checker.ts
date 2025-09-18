@@ -137,5 +137,5 @@ export function validateColorContrast(): {
 // Export for debugging in browser console
 if (typeof window !== "undefined") {
 	(window as any).validateInferaColors = validateColorContrast;
-	(window as any).calculateContrastRatio = calculateContrastRatio;
+			// Removed dark mode accessibility checks
 }

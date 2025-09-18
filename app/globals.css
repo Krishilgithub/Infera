@@ -54,50 +54,10 @@
   --radius: 0.75rem;
   }
 
-  /* Dark Mode Overrides - Systematic color role swapping */
-  [data-theme='dark'],
-  .dark {
-    /* Dark Surface Colors */
-    --surface-light: #18181b;
-    --surface-muted: #232336;
-    --surface-elevated: #232336;
-
-    /* Dark Text Colors */
-    --text-primary: #f3f4f6;
-    --text-secondary: #a1a1aa;
-    --text-tertiary: #52525b;
-
-    /* Update Component Variables for Dark Mode */
-    --background: var(--surface-light);
-    --foreground: var(--text-primary);
-    --muted: var(--surface-muted);
-    --muted-foreground: var(--text-secondary);
-    --card: var(--surface-elevated);
-    --card-foreground: var(--text-primary);
-    --popover: var(--surface-elevated);
-    --popover-foreground: var(--text-primary);
-    --border: #27272a;
-    --input: #27272a;
-    --secondary: var(--surface-muted);
-    --secondary-foreground: var(--text-primary);
-
-    /* Brand colors remain consistent for recognition */
-    --primary: var(--brand-primary);
-    --primary-foreground: var(--surface-light);
-    --accent: var(--brand-accent);
-    --accent-foreground: var(--surface-light);
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
+  /* Removed dark mode overrides and selectors */
 
   body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    /* Removed dark mode gradient background */
   }
 
   /* Typography Hierarchy - Clear visual distinction */
@@ -146,7 +106,6 @@
     outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
   }
-}
 
 @layer components {
   .container {
@@ -159,10 +118,10 @@
 
   /* Brand gradient text - for headings and emphasis */
   .gradient-text {
-    background: var(--brand-gradient);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
     color: transparent;
     font-weight: 700;
     letter-spacing: -0.5px;
@@ -173,10 +132,7 @@
     background: linear-gradient(120deg, #f3f4f6 0%, #e0e7ff 100%);
   }
 
-  [data-theme='dark'] .gradient-bg,
-  .dark .gradient-bg {
-    background: linear-gradient(120deg, #232336 0%, #37306b 100%);
-  }
+  /* Removed dark mode gradient background */
 
   /* Button variants with proper contrast */
   .btn-primary {
@@ -222,4 +178,5 @@
   .card-elevated:hover {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   }
+}
 }
