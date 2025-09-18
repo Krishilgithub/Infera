@@ -80,7 +80,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { action, display_name } = body;
+    const { action } = body;
     const meetingService = new MeetingService(supabase);
 
     switch (action) {
@@ -93,7 +93,7 @@ export async function PATCH(
         return NextResponse.json(endedMeeting);
 
       case 'join':
-        await meetingService.joinMeeting(params.id, user.id, display_name);
+        await meetingService.joinMeeting(params.id, user.id);
         return NextResponse.json({ success: true });
 
       case 'leave':

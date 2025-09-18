@@ -77,8 +77,6 @@ const RecentMeetingCard: React.FC<RecentMeetingCardProps> = ({ meeting }) => {
     cancelled: 'bg-red-50 text-red-700 border-red-200'
   }
 
-  /* Action handlers removed from RecentMeetingCard. Actions are defined in DashboardOverview. */
-
   return (
     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100 hover:shadow-md transition-all duration-200">
       <div className="flex items-center space-x-4">
@@ -223,12 +221,7 @@ export default function DashboardOverview() {
         return
       }
       const meeting = await res.json()
-      // Navigate directly to meeting room
-      if (meeting?.meeting_code) {
-        window.location.href = `/meeting/${encodeURIComponent(meeting.meeting_code)}`
-        return
-      }
-      alert(`Meeting created. Code: ${meeting.meeting_code || 'N/A'}`)
+      alert(`Meeting created. Code: ${meeting.meeting_code}`)
     } catch (e: any) {
       alert('Error: ' + e?.message)
     }
@@ -271,50 +264,6 @@ export default function DashboardOverview() {
     // refresh dashboard
     const refreshed = await fetch('/api/meetings/dashboard')
     if (refreshed.ok) setDashboardData(await refreshed.json())
-  }
-
-  async function startScheduledMeeting(id: string) {
-    try {
-      const res = await fetch(`/api/meetings/${encodeURIComponent(id)}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'start' })
-      })
-      const body = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        alert('Failed to start meeting: ' + (body?.error || res.statusText))
-        return
-      }
-      if (body?.meeting_code) {
-        window.location.href = `/meeting/${encodeURIComponent(body.meeting_code)}`
-        return
-      }
-      const refreshed = await fetch('/api/meetings/dashboard')
-      if (refreshed.ok) setDashboardData(await refreshed.json())
-    } catch (e: any) {
-      alert('Error: ' + e?.message)
-    }
-  }
-
-  async function joinOngoingMeeting(meeting: any) {
-    try {
-      const code = meeting?.meeting_code
-      if (code) {
-        window.location.href = `/meeting/${encodeURIComponent(code)}`
-        return
-      }
-      const res = await fetch(`/api/meetings/${encodeURIComponent(meeting.id)}`)
-      if (res.ok) {
-        const data = await res.json().catch(() => null)
-        if (data?.meeting_code) {
-          window.location.href = `/meeting/${encodeURIComponent(data.meeting_code)}`
-          return
-        }
-      }
-      alert('Unable to resolve meeting code to join.')
-    } catch (e: any) {
-      alert('Error: ' + e?.message)
-    }
   }
 
   // KPI data
@@ -502,7 +451,6 @@ export default function DashboardOverview() {
                               <div className="text-xs text-gray-600">{m.scheduled_at ? new Date(m.scheduled_at).toLocaleString() : ''}</div>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <button onClick={() => startScheduledMeeting(m.id)} className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-700">Start</button>
                               <span className="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">upcoming</span>
                             </div>
                           </div>
@@ -528,7 +476,6 @@ export default function DashboardOverview() {
                               <div className="text-xs text-gray-600">Started {m.started_at ? new Date(m.started_at).toLocaleString() : ''}</div>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <button onClick={() => joinOngoingMeeting(m)} className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-700">Join</button>
                               <span className="text-xs px-2 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200">ongoing</span>
                             </div>
                           </div>

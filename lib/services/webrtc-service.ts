@@ -35,17 +35,12 @@ export class WebRTCService {
   public onHandRaised?: (participantId: string, raised: boolean) => void;
 
   constructor() {
-    // Initialize socket connection only in browser
-    if (typeof window !== 'undefined') {
-      this.initializeSocket();
-    }
+    // Initialize socket connection
+    this.initializeSocket();
   }
 
   private initializeSocket(): void {
-    if (this.socket) return;
-    const base = typeof window !== 'undefined' ? (process.env.NEXT_PUBLIC_SOCKET_URL || window.location.origin) : (process.env.NEXT_PUBLIC_SOCKET_URL || '');
-    if (!base) return; // avoid server-side init
-    this.socket = io(base, {
+    this.socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || window.location.origin, {
       transports: ['websocket', 'polling']
     });
 
@@ -89,7 +84,6 @@ export class WebRTCService {
   }
 
   async joinMeeting(meetingId: string, userId: string, isHost: boolean = false): Promise<void> {
-    if (!this.socket) this.initializeSocket();
     this.meetingId = meetingId;
     this.userId = userId;
     this.isHost = isHost;

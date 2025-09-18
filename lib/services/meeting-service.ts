@@ -101,19 +101,6 @@ export class MeetingService {
 
   async createMeeting(userId: string, meetingData: CreateMeetingRequest): Promise<Meeting> {
     try {
-      // Enforce only one ongoing meeting per creator
-      if (!meetingData.scheduled_at) {
-        const { data: existingOngoing } = await this.supabase
-          .from('meetings')
-          .select('id')
-          .eq('created_by', userId)
-          .eq('status', 'ongoing')
-          .limit(1)
-          .maybeSingle();
-        if (existingOngoing) {
-          throw new Error('You already have an ongoing meeting. Please end it before starting a new one.');
-        }
-      }
       const notificationService = new NotificationService(this.supabase);
       // Create the meeting
       const { data: meeting, error: meetingError } = await this.supabase
@@ -190,18 +177,6 @@ export class MeetingService {
   async startMeeting(meetingId: string, userId: string): Promise<Meeting> {
     try {
       const notificationService = new NotificationService(this.supabase);
-      // Enforce only one ongoing meeting per creator (excluding this meeting)
-      const { data: otherOngoing } = await this.supabase
-        .from('meetings')
-        .select('id')
-        .eq('created_by', userId)
-        .eq('status', 'ongoing')
-        .neq('id', meetingId)
-        .limit(1)
-        .maybeSingle();
-      if (otherOngoing) {
-        throw new Error('You already have an ongoing meeting. Please end it before starting another.');
-      }
       const { data: meeting, error } = await this.supabase
         .from('meetings')
         .update({
@@ -297,10 +272,8 @@ export class MeetingService {
     }
   }
 
-  async joinMeeting(meetingId: string, userId: string, displayName?: string): Promise<void> {
+  async joinMeeting(meetingId: string, userId: string): Promise<void> {
     try {
-      // Overload supports display name by reading from a temp property on supabase client context is not feasible here
-      // We'll keep API layer to pass display_name in update/insert calls
       // Check if user is already a participant
       const { data: existingParticipant } = await this.supabase
         .from('participants')
@@ -315,8 +288,7 @@ export class MeetingService {
           .from('participants')
           .update({
             is_present: true,
-            joined_at: new Date().toISOString(),
-            ...(displayName ? { display_name: displayName } : {})
+            joined_at: new Date().toISOString()
           })
           .eq('meeting_id', meetingId)
           .eq('user_id', userId);
@@ -329,8 +301,7 @@ export class MeetingService {
             user_id: userId,
             role: 'attendee',
             is_present: true,
-            joined_at: new Date().toISOString(),
-            ...(displayName ? { display_name: displayName } : {})
+            joined_at: new Date().toISOString()
           });
       }
     } catch (error) {
@@ -349,28 +320,6 @@ export class MeetingService {
         })
         .eq('meeting_id', meetingId)
         .eq('user_id', userId);
-
-      // If creator is leaving, and there are no participants present, complete the meeting here
-      const { data: meeting } = await this.supabase
-        .from('meetings')
-        .select('created_by, started_at, status')
-        .eq('id', meetingId)
-        .single();
-
-      // Check if any participants still present
-      const { data: present } = await this.supabase
-        .from('participants')
-        .select('id')
-        .eq('meeting_id', meetingId)
-        .eq('is_present', true)
-        .limit(1)
-        .maybeSingle();
-
-      if (!present && meeting?.status === 'ongoing') {
-        // End meeting when everyone has left
-        const creatorId = meeting.created_by;
-        await this.endMeeting(meetingId, creatorId);
-      }
     } catch (error) {
       console.error('Error leaving meeting:', error);
       throw error;
