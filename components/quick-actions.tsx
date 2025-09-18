@@ -8,7 +8,8 @@ import {
   Calendar, 
   Search, 
   UserPlus, 
-  ArrowRight 
+  ArrowRight,
+  Users
 } from 'lucide-react';
 
 interface QuickActionItem {
@@ -123,18 +124,18 @@ const QuickActions: React.FC<QuickActionsProps> = ({ className = "" }) => {
       action: startNewMeeting
     },
     {
+      title: "Join Meeting",
+      description: "Enter a meeting code to join",
+      icon: Users,
+      color: "outline",
+      link: "/join"
+    },
+    {
       title: "Schedule Meeting",
       description: "Plan and invite participants",
       icon: Calendar,
       color: "outline",
       action: scheduleMeeting
-    },
-    {
-      title: "Search Transcripts",
-      description: "Find specific discussions or decisions",
-      icon: Search,
-      color: "outline",
-      action: () => console.log('Search modal')
     },
     {
       title: "Invite Team",
