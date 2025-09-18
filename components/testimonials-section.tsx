@@ -103,134 +103,128 @@ export default function TestimonialsSection() {
 		<section className="section-padding bg-background">
 			<div className="container">
 				{/* Section Header */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					viewport={{ once: true }}
-					transition={{ duration: 0.6 }}
-					className="text-center mb-16"
-				>
-					<h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-						Trusted by Teams
-						<span className="gradient-text block">Around the World</span>
-					</h2>
-					<p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-						Join thousands of professionals who have transformed their meetings
-						with Infera
-					</p>
+				   <motion.div
+					   initial={{ opacity: 0, y: 20 }}
+					   whileInView={{ opacity: 1, y: 0 }}
+					   viewport={{ once: true }}
+					   transition={{ duration: 0.6 }}
+					   className="text-center mb-16"
+				   >
+					   <h2 className="text-3xl md:text-4xl font-bold mb-4 gradient-text">
+						   Trusted by Teams
+						   <span className="gradient-text block">Around the World</span>
+					   </h2>
+					   <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8" aria-live='polite'>
+						   Join thousands of professionals who have transformed their meetings
+						   with Infera
+					   </p>
 
 					{/* Overall Stats */}
-					<div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-						<div className="text-center">
-							<div className="text-3xl font-bold text-primary mb-1">
-								50,000+
-							</div>
-							<div className="text-sm text-muted-foreground">Active Users</div>
-						</div>
-						<div className="text-center">
-							<div className="text-3xl font-bold text-primary mb-1">1M+</div>
-							<div className="text-sm text-muted-foreground">
-								Meetings Analyzed
-							</div>
-						</div>
-						<div className="text-center">
-							<div className="text-3xl font-bold text-primary mb-1">98%</div>
-							<div className="text-sm text-muted-foreground">
-								Satisfaction Rate
-							</div>
-						</div>
-						<div className="text-center">
-							<div className="text-3xl font-bold text-primary mb-1">4.9/5</div>
-							<div className="text-sm text-muted-foreground">
-								Average Rating
-							</div>
-						</div>
-					</div>
+					   <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+						   <div className="text-center">
+							   <div className="text-3xl md:text-4xl font-bold gradient-text mb-2" aria-label="50,000+">50,000+</div>
+							   <div className="text-sm text-muted-foreground" aria-label="Active Users">Active Users</div>
+						   </div>
+						   <div className="text-center">
+							   <div className="text-3xl md:text-4xl font-bold gradient-text mb-2" aria-label="1M+">1M+</div>
+							   <div className="text-sm text-muted-foreground" aria-label="Meetings Analyzed">Meetings Analyzed</div>
+						   </div>
+						   <div className="text-center">
+							   <div className="text-3xl md:text-4xl font-bold gradient-text mb-2" aria-label="98%">98%</div>
+							   <div className="text-sm text-muted-foreground" aria-label="Satisfaction Rate">Satisfaction Rate</div>
+						   </div>
+						   <div className="text-center">
+							   <div className="text-3xl md:text-4xl font-bold gradient-text mb-2" aria-label="4.9/5">4.9/5</div>
+							   <div className="text-sm text-muted-foreground" aria-label="Average Rating">Average Rating</div>
+						   </div>
+					   </div>
 				</motion.div>
 
 				{/* Testimonials Grid */}
-				<motion.div
-					variants={containerVariants}
-					initial="hidden"
-					whileInView="visible"
-					viewport={{ once: true }}
-					className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16"
-				>
-					{testimonials.map((testimonial, index) => (
-						<motion.div key={index} variants={itemVariants}>
-							<Card className="card-elevated h-full group hover:shadow-lg transition-all duration-300">
-								<CardContent className="p-6">
-									{/* Rating */}
-									<div className="flex items-center mb-4">
-										{[...Array(testimonial.rating)].map((_, i) => (
-											<Star
-												key={i}
-												className="h-4 w-4 fill-yellow-400 text-yellow-400"
-											/>
-										))}
-									</div>
+				   <motion.div
+					   variants={containerVariants}
+					   initial="hidden"
+					   whileInView="visible"
+					   viewport={{ once: true }}
+					   className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16"
+				   >
+					   {testimonials.map((testimonial, index) => (
+						   <motion.div key={index} variants={itemVariants}>
+							   <Card className="card-elevated h-full group hover:shadow-lg transition-all duration-300" tabIndex={0}>
+								   <CardContent className="p-6">
+									   {/* Rating */}
+									   <div className="flex items-center mb-4" aria-label={`Rated ${testimonial.rating} out of 5`}>
+										   {[...Array(testimonial.rating)].map((_, i) => (
+											   <Star
+												   key={i}
+												   className="h-4 w-4 fill-yellow-400 text-yellow-400"
+											   />
+										   ))}
+									   </div>
 
-									{/* Quote */}
-									<div className="relative mb-6">
-										<Quote className="absolute -top-2 -left-2 h-6 w-6 text-primary/20" />
-										<p className="text-muted-foreground leading-relaxed pl-4">
-											"{testimonial.testimonial}"
-										</p>
-									</div>
+									   {/* Quote */}
+									   <div className="relative mb-6">
+										   <Quote className="absolute -top-2 -left-2 h-6 w-6 text-primary/20" />
+										   <p className="text-muted-foreground leading-relaxed pl-4" aria-live='polite'>
+											   "{testimonial.testimonial}"
+										   </p>
+									   </div>
 
-									{/* Metric */}
-									<div className="bg-primary/10 rounded-lg p-3 mb-6 text-center">
-										<div className="font-semibold text-primary">
-											{testimonial.metrics}
-										</div>
-									</div>
+									   {/* Metric */}
+									   <div className="bg-primary/10 rounded-lg p-3 mb-6 text-center">
+										   <div className="font-semibold text-primary">
+											   {testimonial.metrics}
+										   </div>
+									   </div>
 
-									{/* Author */}
-									<div className="flex items-center">
-										<div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-xl mr-4">
-											{testimonial.avatar}
-										</div>
-										<div>
-											<div className="font-semibold text-foreground">
-												{testimonial.name}
-											</div>
-											<div className="text-sm text-muted-foreground">
-												{testimonial.role}
-											</div>
-											<div className="text-sm text-primary font-medium">
-												{testimonial.company}
-											</div>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-						</motion.div>
-					))}
-				</motion.div>
+									   {/* Author */}
+									   <div className="flex items-center">
+										   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-xl mr-4">
+											   {testimonial.avatar}
+										   </div>
+										   <div>
+											   <div className="font-semibold text-foreground">
+												   {testimonial.name}
+											   </div>
+											   <div className="text-sm text-muted-foreground">
+												   {testimonial.role}
+											   </div>
+											   <div className="text-sm text-primary font-medium">
+												   {testimonial.company}
+											   </div>
+										   </div>
+									   </div>
+								   </CardContent>
+							   </Card>
+						   </motion.div>
+					   ))}
+				   </motion.div>
 
 				{/* Company Logos */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					viewport={{ once: true }}
-					transition={{ duration: 0.6, delay: 0.3 }}
-					className="text-center"
-				>
-					<p className="text-sm font-medium text-muted-foreground mb-8">
-						Trusted by teams at these companies and many more
-					</p>
-					<div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
-						{companies.map((company, index) => (
-							<div
-								key={index}
-								className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
-							>
-								<span className="text-2xl">{company.logo}</span>
-								<span className="font-medium">{company.name}</span>
-							</div>
-						))}
-					</div>
-				</motion.div>
+				   <motion.div
+					   initial={{ opacity: 0, y: 20 }}
+					   whileInView={{ opacity: 1, y: 0 }}
+					   viewport={{ once: true }}
+					   transition={{ duration: 0.6, delay: 0.3 }}
+					   className="text-center"
+				   >
+					   <p className="text-sm font-medium text-muted-foreground mb-8" aria-live='polite'>
+						   Trusted by teams at these companies and many more
+					   </p>
+					   <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
+						   {companies.map((company, index) => (
+							   <div
+								   key={index}
+								   className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
+								   tabIndex={0}
+								   aria-label={company.name}
+							   >
+								   <span className="text-2xl">{company.logo}</span>
+								   <span className="font-medium">{company.name}</span>
+							   </div>
+						   ))}
+					   </div>
+				   </motion.div>
 			</div>
 		</section>
 	);

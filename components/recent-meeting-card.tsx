@@ -105,7 +105,7 @@ const RecentMeetingCard: React.FC<RecentMeetingCardProps> = ({ meeting }) => {
         {meeting?.actionItems && meeting.actionItems > 0 && (
           <div className="flex items-center space-x-1 text-sm text-muted-foreground mb-4">
             <CheckSquare size={14} />
-            <span>{meeting?.actionItems} action items</span>
+            <span>{meeting?.actionItems} task assignments</span>
           </div>
         )}
         

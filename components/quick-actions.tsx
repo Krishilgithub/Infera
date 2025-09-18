@@ -57,51 +57,39 @@ const QuickActions: React.FC<QuickActionsProps> = ({ className = "" }) => {
   ];
 
   return (
-    <Card className={className}>
+    <Card className={`bg-white border border-gray-200 shadow-md ${className}`}>
       <CardHeader>
         <div>
-          <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
-          <p className="text-sm text-muted-foreground">Common tasks and shortcuts</p>
+          <CardTitle className="text-lg font-semibold text-gray-900">Quick Actions</CardTitle>
+          <p className="text-sm text-gray-600">Common tasks and shortcuts</p>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           {actions?.map((action, index) => (
             <div key={index} className="group">
               {action?.link ? (
                 <Link href={action?.link}>
-                  <div className="flex items-start space-x-3 p-4 rounded-lg border border-border hover:border-primary/20 hover:bg-primary/5 transition-all duration-200 cursor-pointer">
-                    <div className="p-2 bg-primary/10 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-200">
-                      <action.icon size={20} />
+                  <div className="flex flex-col items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer min-h-[100px] justify-center">
+                    <div className="p-3 bg-gray-50 text-gray-700 rounded-lg group-hover:bg-gray-100 transition-colors duration-200 mb-2">
+                      <action.icon size={24} />
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-foreground group-hover:text-primary transition-colors duration-200">
-                        {action?.title}
-                      </h4>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {action?.description}
-                      </p>
-                    </div>
-                    <ArrowRight size={16} className="text-muted-foreground group-hover:text-primary transition-colors duration-200" />
+                    <h4 className="font-medium text-gray-900 text-center text-sm">
+                      {action?.title}
+                    </h4>
                   </div>
                 </Link>
               ) : (
                 <button
                   onClick={action?.action}
-                  className="w-full text-left flex items-start space-x-3 p-4 rounded-lg border border-border hover:border-primary/20 hover:bg-primary/5 transition-all duration-200"
+                  className="w-full flex flex-col items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:shadow-md transition-all duration-200 min-h-[100px] justify-center"
                 >
-                  <div className="p-2 bg-primary/10 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-200">
-                    <action.icon size={20} />
+                  <div className="p-3 bg-gray-50 text-gray-700 rounded-lg group-hover:bg-gray-100 transition-colors duration-200 mb-2">
+                    <action.icon size={24} />
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-medium text-foreground group-hover:text-primary transition-colors duration-200">
-                      {action?.title}
-                    </h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {action?.description}
-                    </p>
-                  </div>
-                  <ArrowRight size={16} className="text-muted-foreground group-hover:text-primary transition-colors duration-200" />
+                  <h4 className="font-medium text-gray-900 text-center text-sm">
+                    {action?.title}
+                  </h4>
                 </button>
               )}
             </div>

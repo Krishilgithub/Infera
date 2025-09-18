@@ -44,7 +44,7 @@ const plans = [
 			"Unlimited meetings",
 			"Advanced emotion tracking",
 			"Speaker analytics",
-			"Smart action items",
+			"Smart task assignments",
 			"Custom workflows",
 			"Jargon assistant",
 			"Priority support",
@@ -102,7 +102,7 @@ const comparisonFeatures = [
 			},
 			{ name: "Meeting summaries", free: "✓", pro: "✓", enterprise: "✓" },
 			{
-				name: "Action items",
+				name: "Task assignments",
 				free: "Basic",
 				pro: "Smart",
 				enterprise: "Smart",

@@ -35,7 +35,7 @@ const faqs = [
   },
   {
     question: 'Can I use Infera for client meetings?',
-    answer: 'Yes! Infera is perfect for client meetings. You can easily share summaries and action items with clients while maintaining full control over data privacy settings.'
+    answer: 'Yes! Infera is perfect for client meetings. You can easily share summaries and task assignments with clients while maintaining full control over data privacy settings.'
   }
 ]
 

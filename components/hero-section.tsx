@@ -36,7 +36,7 @@ export default function HeroSection() {
 							</h1>
 
 							<p className="text-xl text-muted-foreground max-w-lg">
-								Get real-time transcription, emotion tracking, action items, and
+								Get real-time transcription, emotion tracking, task assignments, and
 								automated summaries. Never miss important insights again.
 							</p>
 						</div>
@@ -154,10 +154,10 @@ export default function HeroSection() {
 									</div>
 								</div>
 
-								{/* Action Items */}
+								{/* Task Assignments */}
 								<div className="bg-black/10 dark:bg-white/10 rounded-lg p-4">
 									<h4 className="text-sm font-medium text-foreground mb-2">
-										Action Items
+										Task Assignments
 									</h4>
 									<div className="space-y-1 text-sm text-foreground/80">
 										<div>• Finalize mobile app design by Friday</div>
