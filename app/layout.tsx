@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
+import HelpWidget from "@/components/help-widget";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthProvider } from "@/contexts/auth-context";
@@ -72,16 +73,17 @@ export default function RootLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	return (
-		<html lang="en" suppressHydrationWarning>
-			<body className={inter.className}>
-				<AuthProvider>
-					{children}
-					<Toaster />
-					<Analytics />
-					<SpeedInsights />
-				</AuthProvider>
-			</body>
-		</html>
-	);
+		return (
+			<html lang="en" suppressHydrationWarning>
+				<body className={inter.className}>
+					<AuthProvider>
+						{children}
+						<HelpWidget />
+						<Toaster />
+						<Analytics />
+						<SpeedInsights />
+					</AuthProvider>
+				</body>
+			</html>
+		);
 }

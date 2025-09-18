@@ -15,7 +15,8 @@
 		"postbuild": "next-sitemap || echo 'next-sitemap not found, skipping sitemap generation'",
 		"analyze": "cross-env ANALYZE=true next build",
 		"render-build": "npm install && npm run build",
-		"render-start": "npm start"
+		"render-start": "npm start",
+		"socket": "node socket.js"
 	},
 	"dependencies": {
 		"@radix-ui/react-slot": "^1.0.2",
