@@ -221,7 +221,12 @@ export default function DashboardOverview() {
         return
       }
       const meeting = await res.json()
-      alert(`Meeting created. Code: ${meeting.meeting_code}`)
+      // Navigate directly to the meeting room so it starts immediately
+      if (meeting?.meeting_code) {
+        window.location.href = `/meeting/${encodeURIComponent(meeting.meeting_code)}`
+      } else {
+        alert('Meeting created but no code returned.')
+      }
     } catch (e: any) {
       alert('Error: ' + e?.message)
     }
@@ -476,6 +481,12 @@ export default function DashboardOverview() {
                               <div className="text-xs text-gray-600">Started {m.started_at ? new Date(m.started_at).toLocaleString() : ''}</div>
                             </div>
                             <div className="flex items-center space-x-2">
+                              <a
+                                href={m.meeting_code ? `/meeting/${encodeURIComponent(m.meeting_code)}` : '#'}
+                                className={`px-2 py-1 text-xs border rounded ${m.meeting_code ? 'border-gray-300 hover:bg-gray-50 text-gray-700' : 'border-gray-200 text-gray-400 cursor-not-allowed'}`}
+                              >
+                                Join
+                              </a>
                               <span className="text-xs px-2 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200">ongoing</span>
                             </div>
                           </div>

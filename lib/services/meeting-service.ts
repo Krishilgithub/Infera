@@ -102,6 +102,42 @@ export class MeetingService {
   async createMeeting(userId: string, meetingData: CreateMeetingRequest): Promise<Meeting> {
     try {
       const notificationService = new NotificationService(this.supabase);
+      // If instant meeting (no schedule), ensure only one ongoing meeting per creator
+      if (!meetingData.scheduled_at) {
+        const { data: existingOngoing } = await this.supabase
+          .from('meetings')
+          .select('*')
+          .eq('created_by', userId)
+          .eq('status', 'ongoing')
+          .order('started_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (existingOngoing) {
+          // Ensure creator is marked present
+          const { data: existingParticipant } = await this.supabase
+            .from('participants')
+            .select('id')
+            .eq('meeting_id', existingOngoing.id)
+            .eq('user_id', userId)
+            .single();
+
+          if (existingParticipant) {
+            await this.supabase
+              .from('participants')
+              .update({ is_present: true, joined_at: new Date().toISOString() })
+              .eq('meeting_id', existingOngoing.id)
+              .eq('user_id', userId);
+          } else {
+            await this.supabase
+              .from('participants')
+              .insert({ meeting_id: existingOngoing.id, user_id: userId, role: 'host', is_present: true, joined_at: new Date().toISOString() });
+          }
+
+          return existingOngoing as unknown as Meeting;
+        }
+      }
+
       // Create the meeting
       const { data: meeting, error: meetingError } = await this.supabase
         .from('meetings')

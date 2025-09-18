@@ -35,11 +35,14 @@ export class WebRTCService {
   public onHandRaised?: (participantId: string, raised: boolean) => void;
 
   constructor() {
-    // Initialize socket connection
-    this.initializeSocket();
+    // Initialize socket connection (only on client)
+    if (typeof window !== 'undefined') {
+      this.initializeSocket();
+    }
   }
 
   private initializeSocket(): void {
+    if (typeof window === 'undefined') return;
     this.socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || window.location.origin, {
       transports: ['websocket', 'polling']
     });
@@ -83,13 +86,18 @@ export class WebRTCService {
     });
   }
 
-  async joinMeeting(meetingId: string, userId: string, isHost: boolean = false): Promise<void> {
+  async joinMeeting(meetingId: string, userId: string, isHost: boolean = false, displayName?: string): Promise<void> {
+    // Leave any existing meeting first
+    if (this.meetingId) {
+      await this.leaveMeeting();
+    }
+
     this.meetingId = meetingId;
     this.userId = userId;
     this.isHost = isHost;
 
-    // Join the meeting room
-    this.socket?.emit('join-meeting', { meetingId, userId, isHost });
+    // Join the meeting room (include optional displayName for UI on peers)
+    this.socket?.emit('join-meeting', { meetingId, userId, isHost, displayName });
   }
 
   async leaveMeeting(): Promise<void> {
@@ -138,9 +146,10 @@ export class WebRTCService {
 
   async startScreenShare(): Promise<MediaStream> {
     try {
+      // Capture video only to avoid system-audio echo loops
       this.screenStream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
-        audio: true
+        audio: false
       });
 
       // Replace video track in all peer connections
@@ -257,11 +266,18 @@ export class WebRTCService {
       ]
     });
 
-    // Add local stream tracks
+    // Add audio track from local stream
     if (this.localStream) {
-      this.localStream.getTracks().forEach((track) => {
+      this.localStream.getAudioTracks().forEach((track) => {
         pc.addTrack(track, this.localStream!);
       });
+    }
+
+    // Add video track: prefer screen share if active, otherwise camera video
+    const activeVideoTrack = this.screenStream?.getVideoTracks()[0] || this.localStream?.getVideoTracks()[0];
+    if (activeVideoTrack) {
+      const senderStream = this.screenStream || this.localStream!;
+      pc.addTrack(activeVideoTrack, senderStream);
     }
 
     // Handle remote stream
@@ -283,8 +299,9 @@ export class WebRTCService {
 
     this.peerConnections.set(participantId, pc);
 
-    // Create offer if we're the initiator
-    if (this.userId && this.userId < participantId) {
+    // Create offer if we're the initiator (compare socket IDs for determinism)
+    const mySocketId = this.socket?.id || '';
+    if (mySocketId && mySocketId < participantId) {
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
       
@@ -339,4 +356,14 @@ export class WebRTCService {
   }
 }
 
-export const webrtcService = new WebRTCService();
+let _webrtcSingleton: WebRTCService | null = null;
+export function getWebRTCService(): WebRTCService {
+  if (typeof window === 'undefined') {
+    // During SSR, return a stub to avoid crashes; actual instance will be created on client
+    return (_webrtcSingleton as any) || ({} as WebRTCService);
+  }
+  if (!_webrtcSingleton) {
+    _webrtcSingleton = new WebRTCService();
+  }
+  return _webrtcSingleton;
+}
