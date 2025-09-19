@@ -44,25 +44,15 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    
-    // Get the current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
 
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
 
+    // If a code is provided, allow public fetch (RLS governs visibility)
     if (code) {
-      // Get meeting by code
       const meetingService = new MeetingService(supabase);
       const meeting = await meetingService.getMeetingByCode(code);
-      
+
       if (!meeting) {
         return NextResponse.json(
           { error: 'Meeting not found' },
@@ -73,7 +63,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(meeting);
     }
 
-    // Get user's meetings
+    // Otherwise, this is a request for the authenticated user's dashboard
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const meetingService = new MeetingService(supabase);
     const dashboardData = await meetingService.getDashboardData(user.id);
     return NextResponse.json(dashboardData);
@@ -85,3 +83,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
