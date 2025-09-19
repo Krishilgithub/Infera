@@ -32,12 +32,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // Handle different auth events
         if (event === 'SIGNED_OUT') {
-          router.push('/login')
+          // Preserve current path as next target on sign out
+          try {
+            const current = window.location.pathname + window.location.search
+            const url = new URL('/login', window.location.origin)
+            url.searchParams.set('next', current)
+            router.push(url.toString())
+          } catch {
+            router.push('/login')
+          }
         } else if (event === 'SIGNED_IN' && session?.user) {
-          // Only redirect to dashboard if we're not already on a protected route
+          // After sign in, if a `next` is specified in URL or localStorage, go there
+          try {
+            const url = new URL(window.location.href)
+            const next = url.searchParams.get('next') || localStorage.getItem('next') || ''
+            const safeNext = next && next.startsWith('/') ? next : ''
+            if (safeNext) {
+              // Clear the stored next to avoid loops
+              localStorage.removeItem('next')
+              setTimeout(() => {
+                router.replace(safeNext)
+              }, 100)
+              return
+            }
+          } catch {}
+
+          // Fallback: Only redirect to dashboard from public pages
           const currentPath = window.location.pathname
           if (currentPath === '/login' || currentPath === '/signup' || currentPath === '/') {
-            // Small delay to ensure session is fully established
             setTimeout(() => {
               router.push('/dashboard')
             }, 100)

@@ -16,6 +16,20 @@ export class MeetingService {
 
       const nowIso = new Date().toISOString();
 
+      // Pre-fetch meeting IDs where the user is a participant to avoid cross-table joins
+      const { data: participantRows, error: participantRowsErr } = await this.supabase
+        .from('participants')
+        .select('meeting_id')
+        .eq('user_id', userId);
+      if (participantRowsErr) throw participantRowsErr;
+      const joinedMeetingIds: string[] = Array.from(
+        new Set(
+          (participantRows || [])
+            .map((r: any) => r.meeting_id)
+            .filter(Boolean)
+        )
+      );
+
       // Upcoming: meetings created by user
       const { data: upCreated, error: upCreatedErr } = await this.supabase
         .from('meetings')
@@ -26,13 +40,13 @@ export class MeetingService {
         .order('scheduled_at', { ascending: true });
       if (upCreatedErr) throw upCreatedErr;
 
-      // Upcoming: meetings where user is a participant (inner join)
+      // Upcoming: meetings where user is a participant (filter by IDs to avoid join)
       const { data: upJoined, error: upJoinedErr } = await this.supabase
         .from('meetings')
-        .select('*, meeting_settings(*), participants!inner(user_id)')
+        .select('*, meeting_settings(*)')
         .eq('status', 'scheduled')
         .gte('scheduled_at', nowIso)
-        .eq('participants.user_id', userId)
+        .in('id', joinedMeetingIds.length ? joinedMeetingIds : ['00000000-0000-0000-0000-000000000000'])
         .order('scheduled_at', { ascending: true });
       if (upJoinedErr) throw upJoinedErr;
       const upcoming = dedupeById([...(upCreated || []), ...(upJoined || [])]);
@@ -46,12 +60,12 @@ export class MeetingService {
         .order('started_at', { ascending: false });
       if (onCreatedErr) throw onCreatedErr;
 
-      // Ongoing: participant
+      // Ongoing: participant (filter by IDs to avoid join)
       const { data: onJoined, error: onJoinedErr } = await this.supabase
         .from('meetings')
-        .select('*, meeting_settings(*), participants!inner(user_id)')
+        .select('*, meeting_settings(*)')
         .eq('status', 'ongoing')
-        .eq('participants.user_id', userId)
+        .in('id', joinedMeetingIds.length ? joinedMeetingIds : ['00000000-0000-0000-0000-000000000000'])
         .order('started_at', { ascending: false });
       if (onJoinedErr) throw onJoinedErr;
       const ongoing = dedupeById([...(onCreated || []), ...(onJoined || [])]);
@@ -72,10 +86,10 @@ export class MeetingService {
 
       const { data: coJoined, error: coJoinedErr } = await this.supabase
         .from('meetings')
-        .select('*, meeting_settings(*), participants!inner(user_id)')
+        .select('*, meeting_settings(*)')
         .eq('status', 'completed')
         .gte('ended_at', thirtyIso)
-        .eq('participants.user_id', userId)
+        .in('id', joinedMeetingIds.length ? joinedMeetingIds : ['00000000-0000-0000-0000-000000000000'])
         .order('ended_at', { ascending: false });
       if (coJoinedErr) throw coJoinedErr;
       const completed = dedupeById([...(coCreated || []), ...(coJoined || [])]);
@@ -225,6 +239,11 @@ export class MeetingService {
         .single();
 
       if (error) throw error;
+      if (!meeting) {
+        const notFound: any = new Error('Meeting not found or not owned by user');
+        notFound.code = 'PGRST116';
+        throw notFound;
+      }
 
       // Update participant status
       await this.supabase
@@ -275,6 +294,11 @@ export class MeetingService {
         .single();
 
       if (error) throw error;
+      if (!meeting) {
+        const notFound: any = new Error('Meeting not found or not owned by user');
+        notFound.code = 'PGRST116';
+        throw notFound;
+      }
 
       // Update all participants as left
       await this.supabase
@@ -311,12 +335,17 @@ export class MeetingService {
   async joinMeeting(meetingId: string, userId: string): Promise<void> {
     try {
       // Check if user is already a participant
-      const { data: existingParticipant } = await this.supabase
+      const { data: existingParticipant, error: existingErr } = await this.supabase
         .from('participants')
         .select('id')
         .eq('meeting_id', meetingId)
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
+
+      if (existingErr && existingErr.code && existingErr.code !== 'PGRST116') {
+        // Real error other than "no rows"; bubble up
+        throw existingErr;
+      }
 
       if (existingParticipant) {
         // Update existing participant

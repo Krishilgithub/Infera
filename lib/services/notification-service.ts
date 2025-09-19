@@ -48,8 +48,7 @@ export class NotificationService {
         const { data: participants, error } = await this.supabase
           .from('participants')
           .select(`
-            user_id,
-            user_email
+            user_id
           `)
           .eq('meeting_id', meeting.id);
 
@@ -82,8 +81,7 @@ export class NotificationService {
       const { data: participants, error } = await this.supabase
         .from('participants')
         .select(`
-          user_id,
-          user_email
+          user_id
         `)
         .eq('meeting_id', meeting.id)
         .eq('is_present', false); // Only notify those not present
@@ -116,8 +114,7 @@ export class NotificationService {
       const { data: participants, error } = await this.supabase
         .from('participants')
         .select(`
-          user_id,
-          user_email
+          user_id
         `)
         .eq('meeting_id', meeting.id);
 

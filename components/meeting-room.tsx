@@ -124,9 +124,10 @@ export default function MeetingRoom({ meetingCode }: MeetingRoomProps) {
         localVideoRef.current.style.transform = 'none';
       }
 
-      // Join signaling room (use meeting.id and a temporary userId; integrate with auth for real app)
+      // Join signaling room using meeting_code to ensure every participant shares the exact same room key
+      const roomId = meeting?.meeting_code || meetingCode;
       const tempUserId = `user-${Math.random().toString(36).slice(2, 8)}`;
-      await rtc.joinMeeting(meeting.id, tempUserId, false, name || undefined);
+      await rtc.joinMeeting(roomId, tempUserId, false, name || undefined);
 
       // Tell backend we've joined (updates participants presence)
       await fetch(`/api/meetings/${encodeURIComponent(meeting.id)}`, {

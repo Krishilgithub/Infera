@@ -24,6 +24,8 @@ export class WebRTCService {
   private meetingId: string | null = null;
   private userId: string | null = null;
   private isHost: boolean = false;
+  private socketConnected: boolean = false;
+  private pendingResolvers: Array<{ resolve: () => void; reject: (err?: any) => void } > = [];
 
   // Event callbacks
   public onParticipantJoined?: (participant: Participant) => void;
@@ -43,8 +45,29 @@ export class WebRTCService {
 
   private initializeSocket(): void {
     if (typeof window === 'undefined') return;
-    this.socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || window.location.origin, {
+    const defaultSocketUrl = `${window.location.protocol}//${window.location.hostname}:4001`;
+    const socketUrl = (process.env.NEXT_PUBLIC_SOCKET_URL as string) || defaultSocketUrl;
+    this.socket = io(socketUrl, {
       transports: ['websocket', 'polling']
+    });
+
+    this.socket.on('connect', () => {
+      this.socketConnected = true;
+      // flush pending resolvers
+      const resolvers = [...this.pendingResolvers];
+      this.pendingResolvers = [];
+      resolvers.forEach(r => r.resolve());
+    });
+
+    this.socket.on('disconnect', () => {
+      this.socketConnected = false;
+    });
+
+    this.socket.on('connect_error', (err) => {
+      // reject all pending waiters on connection error
+      const resolvers = [...this.pendingResolvers];
+      this.pendingResolvers = [];
+      resolvers.forEach(r => r.reject(err));
     });
 
     this.socket.on('participant-joined', (participant: Participant) => {
@@ -61,15 +84,35 @@ export class WebRTCService {
       this.onParticipantUpdated?.(participant);
     });
 
+    // New: when joining a room, the server will send the list of existing participants
+    // so the newly joined client can proactively create peer connections to them.
+    this.socket.on('existing-participants', (participants: Array<{ id: string }>) => {
+      participants?.forEach((p) => {
+        this.createPeerConnection(p.id);
+      });
+    });
+
     this.socket.on('offer', async ({ from, offer }) => {
+      // Ensure we have a peer connection for the sender
+      if (!this.peerConnections.get(from)) {
+        await this.createPeerConnection(from);
+      }
       await this.handleOffer(from, offer);
     });
 
     this.socket.on('answer', async ({ from, answer }) => {
+      // Ensure we have a peer connection for the sender
+      if (!this.peerConnections.get(from)) {
+        await this.createPeerConnection(from);
+      }
       await this.handleAnswer(from, answer);
     });
 
     this.socket.on('ice-candidate', async ({ from, candidate }) => {
+      // Ensure we have a peer connection for the sender
+      if (!this.peerConnections.get(from)) {
+        await this.createPeerConnection(from);
+      }
       await this.handleIceCandidate(from, candidate);
     });
 
@@ -95,6 +138,9 @@ export class WebRTCService {
     this.meetingId = meetingId;
     this.userId = userId;
     this.isHost = isHost;
+
+    // Ensure socket is connected before joining
+    await this.waitForSocketConnected(5000);
 
     // Join the meeting room (include optional displayName for UI on peers)
     this.socket?.emit('join-meeting', { meetingId, userId, isHost, displayName });
@@ -259,6 +305,11 @@ export class WebRTCService {
   }
 
   private async createPeerConnection(participantId: string): Promise<void> {
+    // If a peer connection already exists for this participant, do nothing
+    if (this.peerConnections.has(participantId)) {
+      return;
+    }
+
     const pc = new RTCPeerConnection({
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
@@ -353,6 +404,23 @@ export class WebRTCService {
   disconnect(): void {
     this.leaveMeeting();
     this.socket?.disconnect();
+  }
+
+  // Wait until the socket is connected. Rejects after timeoutMs if not connected.
+  async waitForSocketConnected(timeoutMs: number = 5000): Promise<void> {
+    if (this.socketConnected && this.socket?.connected) return;
+    return new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        // remove this resolver if still pending
+        this.pendingResolvers = this.pendingResolvers.filter(r => r.resolve !== resolve);
+        reject(new Error('Socket connection timeout'));
+      }, Math.max(1000, timeoutMs));
+      const wrapped = {
+        resolve: () => { clearTimeout(timer); resolve(); },
+        reject: (err?: any) => { clearTimeout(timer); reject(err); }
+      };
+      this.pendingResolvers.push(wrapped);
+    });
   }
 }
 

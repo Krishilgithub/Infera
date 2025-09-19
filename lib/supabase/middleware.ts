@@ -40,14 +40,18 @@ export async function updateSession(request: NextRequest) {
 
 	if (
 		!user &&
+		// Never redirect API routes; API handlers can enforce auth as needed
+		!request.nextUrl.pathname.startsWith("/api") &&
 		!request.nextUrl.pathname.startsWith("/login") &&
 		!request.nextUrl.pathname.startsWith("/signup") &&
 		!request.nextUrl.pathname.startsWith("/auth/callback") &&
 		request.nextUrl.pathname !== "/"
 	) {
-		// no user, potentially respond by redirecting the user to the login page
+		// Redirect unauthenticated users to login and preserve the original destination
 		const url = request.nextUrl.clone();
+		const original = request.nextUrl.pathname + (request.nextUrl.search || "");
 		url.pathname = "/login";
+		url.searchParams.set("next", original);
 		return NextResponse.redirect(url);
 	}
 

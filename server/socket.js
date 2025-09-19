@@ -40,6 +40,17 @@ io.on('connection', (socket) => {
 
     socket.join(meetingId);
 
+    // Send the list of existing participants in the room to the newly joined socket
+    try {
+      const room = io.sockets.adapter.rooms.get(meetingId);
+      const existing = Array.from(room || [])
+        .filter((id) => id !== socket.id)
+        .map((id) => ({ id }));
+      socket.emit('existing-participants', existing);
+    } catch (e) {
+      // no-op
+    }
+
     // Notify others in the room about new participant
     socket.to(meetingId).emit('participant-joined', {
       id: socket.id,

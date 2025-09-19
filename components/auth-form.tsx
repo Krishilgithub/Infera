@@ -35,6 +35,14 @@ export default function AuthForm({ mode }: AuthFormProps) {
       url.searchParams.delete('message')
       window.history.replaceState({}, '', url.toString())
     }
+
+    // Persist `next` param (if present) so OAuth flows can restore destination
+    const next = searchParams.get('next')
+    if (next && next.startsWith('/')) {
+      try {
+        localStorage.setItem('next', next)
+      } catch {}
+    }
   }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -83,28 +83,40 @@ export async function PATCH(
     const { action } = body;
     const meetingService = new MeetingService(supabase);
 
-    switch (action) {
-      case 'start':
-        const startedMeeting = await meetingService.startMeeting(params.id, user.id);
-        return NextResponse.json(startedMeeting);
-
-      case 'end':
-        const endedMeeting = await meetingService.endMeeting(params.id, user.id);
-        return NextResponse.json(endedMeeting);
-
-      case 'join':
-        await meetingService.joinMeeting(params.id, user.id);
-        return NextResponse.json({ success: true });
-
-      case 'leave':
-        await meetingService.leaveMeeting(params.id, user.id);
-        return NextResponse.json({ success: true });
-
-      default:
+    try {
+      switch (action) {
+        case 'start': {
+          const startedMeeting = await meetingService.startMeeting(params.id, user.id);
+          return NextResponse.json(startedMeeting);
+        }
+        case 'end': {
+          const endedMeeting = await meetingService.endMeeting(params.id, user.id);
+          return NextResponse.json(endedMeeting);
+        }
+        case 'join': {
+          await meetingService.joinMeeting(params.id, user.id);
+          return NextResponse.json({ success: true });
+        }
+        case 'leave': {
+          await meetingService.leaveMeeting(params.id, user.id);
+          return NextResponse.json({ success: true });
+        }
+        default:
+          return NextResponse.json(
+            { error: 'Invalid action' },
+            { status: 400 }
+          );
+      }
+    } catch (err: any) {
+      // Map PostgREST "no rows" to 404 instead of 500
+      if (err?.code === 'PGRST116') {
         return NextResponse.json(
-          { error: 'Invalid action' },
-          { status: 400 }
+          { error: 'Meeting not found' },
+          { status: 404 }
         );
+      }
+      // For other errors, surface a generic 500
+      throw err;
     }
   } catch (error) {
     console.error('Update meeting API error:', error);
