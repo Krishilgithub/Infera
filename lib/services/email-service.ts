@@ -16,12 +16,14 @@ export class EmailService {
     });
   }
 
-  async sendMeetingInvitation(
-    meeting: Meeting,
-    invitation: MeetingInvitation,
-    inviterName: string
-  ): Promise<void> {
+  async sendMeetingInvitation(data: {
+    meeting: Meeting;
+    invitation: MeetingInvitation;
+    recipientEmail: string;
+    hostName: string;
+  }): Promise<void> {
     try {
+      const { meeting, invitation, hostName, recipientEmail } = data;
       const meetingUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/meeting/${meeting.meeting_code}`;
       const acceptUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/invitation/accept/${invitation.token}`;
       const declineUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/invitation/decline/${invitation.token}`;
@@ -35,44 +37,38 @@ export class EmailService {
         <html>
         <head>
           <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Meeting Invitation</title>
           <style>
             body {
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              font-family: system-ui, sans-serif;
               line-height: 1.6;
+              margin: 0;
+              padding: 20px;
               color: #333;
+            }
+            .container {
               max-width: 600px;
               margin: 0 auto;
+              background: #f9f9f9;
               padding: 20px;
+              border-radius: 8px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             }
             .header {
               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
               color: white;
               padding: 30px;
-              border-radius: 10px 10px 0 0;
-              text-align: center;
-            }
-            .content {
-              background: #f8f9fa;
-              padding: 30px;
-              border-radius: 0 0 10px 10px;
-            }
-            .meeting-details {
-              background: white;
-              padding: 20px;
               border-radius: 8px;
-              margin: 20px 0;
-              border-left: 4px solid #667eea;
+              text-align: center;
+              margin-bottom: 20px;
             }
             .button {
               display: inline-block;
               padding: 12px 24px;
-              margin: 10px 5px;
               text-decoration: none;
               border-radius: 6px;
               font-weight: 600;
-              text-align: center;
+              margin: 0 10px;
             }
             .btn-accept {
               background-color: #28a745;
@@ -86,140 +82,158 @@ export class EmailService {
               background-color: #667eea;
               color: white;
             }
-            .footer {
-              text-align: center;
-              margin-top: 30px;
-              padding-top: 20px;
-              border-top: 1px solid #dee2e6;
-              color: #6c757d;
-              font-size: 14px;
+            .meeting-details {
+              background: white;
+              padding: 20px;
+              border-radius: 8px;
+              margin: 20px 0;
+              border-left: 4px solid #667eea;
             }
           </style>
         </head>
         <body>
-          <div class="header">
-            <h1>🎥 Meeting Invitation</h1>
-            <p>You're invited to join a meeting</p>
-          </div>
-          
-          <div class="content">
-            <p>Hello!</p>
+          <div class="container">
+            <div class="header">
+              <h1>🎥 Meeting Invitation</h1>
+            </div>
             
-            <p><strong>${inviterName}</strong> has invited you to join a meeting on Infera.</p>
+            <p><strong>${hostName}</strong> has invited you to join a meeting on Infera.</p>
             
             <div class="meeting-details">
               <h3>📋 Meeting Details</h3>
               <p><strong>Title:</strong> ${meeting.title}</p>
               ${meeting.description ? `<p><strong>Description:</strong> ${meeting.description}</p>` : ''}
               <p><strong>Scheduled:</strong> ${scheduledDate}</p>
+              <p><strong>Duration:</strong> ${meeting.duration_minutes} minutes</p>
               <p><strong>Meeting Code:</strong> <code>${meeting.meeting_code}</code></p>
             </div>
             
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${acceptUrl}" class="button btn-accept">✅ Accept Invitation</a>
+              <a href="${acceptUrl}" class="button btn-accept">✅ Accept</a>
               <a href="${declineUrl}" class="button btn-decline">❌ Decline</a>
             </div>
             
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${meetingUrl}" class="button btn-join">🚀 Join Meeting Directly</a>
+              <a href="${meetingUrl}" class="button btn-join">🚀 Join Meeting</a>
             </div>
-            
-            <div style="background: #e9ecef; padding: 15px; border-radius: 6px; margin: 20px 0;">
-              <h4>📱 How to Join:</h4>
-              <ol>
-                <li>Click "Join Meeting Directly" above, or</li>
-                <li>Go to <a href="${process.env.NEXT_PUBLIC_BASE_URL}">${process.env.NEXT_PUBLIC_BASE_URL}</a></li>
-                <li>Enter meeting code: <strong>${meeting.meeting_code}</strong></li>
-                <li>Click "Join Meeting"</li>
-              </ol>
-            </div>
-            
-            <p>If you have any issues joining the meeting, please contact ${inviterName} directly.</p>
-          </div>
-          
-          <div class="footer">
-            <p>This invitation was sent by Infera Meeting Platform</p>
-            <p>If you didn't expect this invitation, you can safely ignore this email.</p>
           </div>
         </body>
         </html>
       `;
 
       const textContent = `
-        Meeting Invitation
+        Meeting Invitation from ${hostName}
         
-        ${inviterName} has invited you to join a meeting on Infera.
+        You've been invited to join a meeting on Infera.
         
         Meeting Details:
         - Title: ${meeting.title}
         ${meeting.description ? `- Description: ${meeting.description}` : ''}
         - Scheduled: ${scheduledDate}
+        - Duration: ${meeting.duration_minutes} minutes
         - Meeting Code: ${meeting.meeting_code}
         
-        To join the meeting:
-        1. Go to ${process.env.NEXT_PUBLIC_BASE_URL}
-        2. Enter meeting code: ${meeting.meeting_code}
-        3. Click "Join Meeting"
-        
-        Or click this link to join directly: ${meetingUrl}
-        
+        Join directly: ${meetingUrl}
         Accept invitation: ${acceptUrl}
         Decline invitation: ${declineUrl}
       `;
 
       await this.transporter.sendMail({
         from: `"Infera Meetings" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
-        to: invitation.email,
+        to: recipientEmail,
         subject: `Meeting Invitation: ${meeting.title}`,
         text: textContent,
         html: htmlContent,
       });
-
-      console.log(`Meeting invitation sent to ${invitation.email}`);
     } catch (error) {
       console.error('Error sending meeting invitation:', error);
       throw error;
     }
   }
 
-  async sendMeetingReminder(
-    meeting: Meeting,
-    recipientEmail: string,
-    recipientName: string
-  ): Promise<void> {
+  async sendMeetingConfirmation(data: {
+    to: string;
+    meeting: Meeting;
+    joinUrl: string;
+  }): Promise<void> {
     try {
-      const meetingUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/meeting/${meeting.meeting_code}`;
-      const scheduledTime = new Date(meeting.scheduled_at!);
-      const timeUntilMeeting = Math.round((scheduledTime.getTime() - Date.now()) / (1000 * 60));
+      const { meeting, to: recipientEmail, joinUrl } = data;
+      const scheduledTime = meeting.scheduled_at ? new Date(meeting.scheduled_at) : new Date();
 
       const htmlContent = `
         <!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
-          <title>Meeting Reminder</title>
+          <title>Meeting Confirmation</title>
           <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #667eea; color: white; padding: 20px; text-align: center; }
-            .content { background: #f8f9fa; padding: 20px; }
-            .button { display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; }
+            body {
+              font-family: system-ui, sans-serif;
+              line-height: 1.6;
+              margin: 0;
+              padding: 20px;
+              color: #333;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              background: #f9f9f9;
+              padding: 20px;
+              border-radius: 8px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .header {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 30px;
+              border-radius: 8px;
+              text-align: center;
+              margin-bottom: 20px;
+            }
+            .button {
+              display: inline-block;
+              padding: 12px 24px;
+              background-color: #667eea;
+              color: white;
+              text-decoration: none;
+              border-radius: 6px;
+              font-weight: 600;
+            }
+            .info {
+              background-color: #e3f2fd;
+              color: #1976d2;
+              padding: 15px;
+              border-radius: 6px;
+              margin: 20px 0;
+            }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
-              <h1>⏰ Meeting Reminder</h1>
+              <h1>🎯 Meeting Confirmed</h1>
             </div>
-            <div class="content">
-              <p>Hello ${recipientName},</p>
-              <p>This is a reminder that your meeting "<strong>${meeting.title}</strong>" is starting in ${timeUntilMeeting} minutes.</p>
-              <p><strong>Scheduled Time:</strong> ${scheduledTime.toLocaleString()}</p>
-              <p><strong>Meeting Code:</strong> ${meeting.meeting_code}</p>
-              <div style="text-align: center; margin: 20px 0;">
-                <a href="${meetingUrl}" class="button">Join Meeting Now</a>
-              </div>
+            
+            <p>Your meeting has been confirmed.</p>
+            
+            <div class="info">
+              <h3>📋 Meeting Details</h3>
+              <p><strong>Title:</strong> ${meeting.title}</p>
+              ${meeting.description ? `<p><strong>Description:</strong> ${meeting.description}</p>` : ''}
+              ${meeting.scheduled_at ? 
+                `<p><strong>Scheduled Time:</strong> ${scheduledTime.toLocaleString()}</p>
+                 <p><strong>Duration:</strong> ${meeting.duration_minutes} minutes</p>` :
+                '<p><strong>Status:</strong> Ready to start</p>'}
+              <p><strong>Meeting Code:</strong> <code>${meeting.meeting_code}</code></p>
             </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${joinUrl}" class="button">Join Meeting</a>
+            </div>
+            
+            ${meeting.scheduled_at ? 
+              `<p>You will receive a reminder email 1 hour before the meeting starts.</p>` :
+              `<p>You can join the meeting right away!</p>`}
           </div>
         </body>
         </html>
@@ -228,16 +242,107 @@ export class EmailService {
       await this.transporter.sendMail({
         from: `"Infera Meetings" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
         to: recipientEmail,
-        subject: `Meeting Reminder: ${meeting.title} starts in ${timeUntilMeeting} minutes`,
+        subject: meeting.scheduled_at ? 
+          `Meeting Confirmed: ${meeting.title} - ${scheduledTime.toLocaleString()}` :
+          `Meeting Ready: ${meeting.title}`,
         html: htmlContent,
       });
-
-      console.log(`Meeting reminder sent to ${recipientEmail}`);
     } catch (error) {
-      console.error('Error sending meeting reminder:', error);
+      console.error('Error sending meeting confirmation:', error);
+      throw error;
+    }
+  }
+
+  async sendMeetingStartedNotification(data: {
+    to: string;
+    meeting: Meeting;
+    joinUrl: string;
+  }): Promise<void> {
+    try {
+      const { meeting, to: recipientEmail, joinUrl } = data;
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Meeting Started</title>
+          <style>
+            body {
+              font-family: system-ui, sans-serif;
+              line-height: 1.6;
+              margin: 0;
+              padding: 20px;
+              color: #333;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              background: #f9f9f9;
+              padding: 20px;
+              border-radius: 8px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .header {
+              background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+              color: white;
+              padding: 30px;
+              border-radius: 8px;
+              text-align: center;
+              margin-bottom: 20px;
+            }
+            .button {
+              display: inline-block;
+              padding: 12px 24px;
+              background-color: #dc3545;
+              color: white;
+              text-decoration: none;
+              border-radius: 6px;
+              font-weight: 600;
+            }
+            .alert {
+              background-color: #dc3545;
+              color: white;
+              padding: 15px;
+              border-radius: 6px;
+              margin: 20px 0;
+              text-align: center;
+              font-size: 1.2em;
+              font-weight: bold;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🔴 Meeting Started</h1>
+            </div>
+            
+            <div class="alert">
+              The meeting "${meeting.title}" has started!
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${joinUrl}" class="button">Join Now</a>
+            </div>
+            
+            <p style="text-align: center; color: #666;">
+              Meeting Code: <code>${meeting.meeting_code}</code>
+            </p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      await this.transporter.sendMail({
+        from: `"Infera Meetings" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+        to: recipientEmail,
+        subject: `🔴 Meeting Started: ${meeting.title}`,
+        html: htmlContent,
+      });
+    } catch (error) {
+      console.error('Error sending meeting started notification:', error);
       throw error;
     }
   }
 }
-
-export const emailService = new EmailService();

@@ -108,6 +108,7 @@ export interface CreateMeetingRequest {
   is_recurring?: boolean;
   recurrence_pattern?: string;
   timezone?: string;
+  participants?: string[];
   settings?: Partial<MeetingSettings>;
   invitations?: string[]; // Array of email addresses
 }

@@ -4,15 +4,17 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { useToast } from "@/hooks/use-toast"
+import { MeetingDialog } from "@/components/meeting-dialog"
 import Link from 'next/link'
 import QuickActions from './quick-actions'
 import NotificationPanel from './notification-panel'
-import { 
-  Clock, 
-  Users, 
-  TrendingUp, 
-  CheckCircle, 
-  Video, 
+import {
+  Clock,
+  Users,
+  TrendingUp,
+  CheckCircle,
+  Video,
   Calendar,
   ArrowRight,
   Timer,
@@ -171,11 +173,14 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, subtitle, icon: Icon, t
 }
 
 export default function DashboardOverview() {
+  const { toast } = useToast()
   const [currentTime, setCurrentTime] = useState(new Date())
   const [activeTab, setActiveTab] = useState('recent-meetings')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [dashboardData, setDashboardData] = useState<any | null>(null)
+  const [isInstantMeetingDialogOpen, setIsInstantMeetingDialogOpen] = useState(false)
+  const [isScheduleMeetingDialogOpen, setIsScheduleMeetingDialogOpen] = useState(false)
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -206,47 +211,73 @@ export default function DashboardOverview() {
     loadDashboard()
   }, [])
 
-  async function startNewMeeting() {
+  async function startNewMeeting(data: { title: string; description?: string }) {
     try {
-      const title = prompt('Enter meeting title', 'Instant Meeting')
-      if (title === null) return
       const res = await fetch('/api/meetings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title })
+        body: JSON.stringify({
+          title: data.title,
+          description: data.description
+        })
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        alert('Failed to create meeting: ' + (err?.error || res.statusText))
-        return
+        toast({
+          title: "Error",
+          description: 'Failed to create meeting: ' + (err?.error || res.statusText),
+          variant: "destructive"
+        });
+        return;
       }
       const meeting = await res.json()
       // Navigate directly to the meeting room so it starts immediately
       if (meeting?.meeting_code) {
         window.location.href = `/meeting/${encodeURIComponent(meeting.meeting_code)}`
       } else {
-        alert('Meeting created but no code returned.')
+        toast({
+          title: "Error",
+          description: 'Meeting created but no code returned.',
+          variant: "destructive"
+        });
       }
     } catch (e: any) {
-      alert('Error: ' + e?.message)
+      toast({
+        title: "Error",
+        description: e?.message || 'Failed to create meeting',
+        variant: "destructive"
+      });
     }
   }
 
-  async function scheduleMeeting() {
+  async function scheduleMeeting(data: { title: string; scheduledAt?: string; description?: string }) {
     try {
-      const title = prompt('Enter meeting title', 'Scheduled Meeting')
-      if (title === null) return
-      const when = prompt('Enter scheduled time (ISO, e.g. 2025-09-18T19:30:00Z)')
-      if (!when) return
+      if (!data.scheduledAt) {
+        toast({
+          title: "Error",
+          description: "Please select a date and time for the meeting",
+          variant: "destructive"
+        });
+        return;
+      }
+
       const res = await fetch('/api/meetings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, scheduled_at: when })
+        body: JSON.stringify({
+          title: data.title,
+          scheduled_at: data.scheduledAt,
+          description: data.description
+        })
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        alert('Failed to schedule meeting: ' + (err?.error || res.statusText))
-        return
+        toast({
+          title: "Error",
+          description: 'Failed to schedule meeting: ' + (err?.error || res.statusText),
+          variant: "destructive"
+        });
+        return;
       }
       const meeting = await res.json()
       alert(`Meeting scheduled. Code: ${meeting.meeting_code}`)
@@ -616,15 +647,29 @@ export default function DashboardOverview() {
           </div>
 
           <div className="flex items-center space-x-3">
-            <Button onClick={startNewMeeting} className="bg-gray-700 hover:bg-gray-800 text-white border-0">
+            <Button onClick={() => setIsInstantMeetingDialogOpen(true)} className="bg-gray-700 hover:bg-gray-800 text-white border-0">
               <Video className="mr-2 h-4 w-4" />
               Start Meeting
             </Button>
-            <Button onClick={scheduleMeeting} variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
+            <Button onClick={() => setIsScheduleMeetingDialogOpen(true)} variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
               <Calendar className="mr-2 h-4 w-4" />
               Schedule
             </Button>
           </div>
+
+          <MeetingDialog
+            open={isInstantMeetingDialogOpen}
+            onOpenChange={setIsInstantMeetingDialogOpen}
+            type="instant"
+            onSubmit={startNewMeeting}
+          />
+
+          <MeetingDialog
+            open={isScheduleMeetingDialogOpen}
+            onOpenChange={setIsScheduleMeetingDialogOpen}
+            type="schedule"
+            onSubmit={scheduleMeeting}
+          />
         </div>
 
         {/* KPI Cards */}
@@ -658,11 +703,10 @@ export default function DashboardOverview() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-3 text-sm font-medium rounded-md transition-colors duration-200 flex items-center justify-center space-x-2 ${
-                    activeTab === tab.id
+                  className={`px-4 py-3 text-sm font-medium rounded-md transition-colors duration-200 flex items-center justify-center space-x-2 ${activeTab === tab.id
                       ? 'bg-gray-100 text-gray-900 shadow-sm'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   <Icon size={16} />
                   <span>{tab.label}</span>

@@ -1,9 +1,39 @@
-import { Meeting, MeetingSettings, CreateMeetingRequest, MeetingDashboard, MeetingInvitation } from '@/lib/types/meeting';
+import { Meeting, MeetingSettings, CreateMeetingRequest, MeetingDashboard } from '@/lib/types/meeting';
 import { NotificationService } from '@/lib/services/notification-service';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export class MeetingService {
-  // Injected Supabase client (server-side)
-  constructor(private supabase: any) {}
+  constructor(private supabase: SupabaseClient) {}
+
+  public async getUserEmail(userId: string): Promise<string | null> {
+    try {
+      const { data: profile } = await this.supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', userId)
+        .single();
+
+      return profile?.email || null;
+    } catch (error) {
+      console.error('Error getting user email:', error);
+      return null;
+    }
+  }
+
+  private async getUserName(userId: string): Promise<string> {
+    try {
+      const { data: profile } = await this.supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', userId)
+        .single();
+
+      return profile?.full_name || 'Meeting Host';
+    } catch (error) {
+      console.error('Error getting user name:', error);
+      return 'Meeting Host';
+    }
+  }
 
   async getDashboardData(userId: string): Promise<MeetingDashboard> {
     try {
@@ -26,13 +56,13 @@ export class MeetingService {
         .order('scheduled_at', { ascending: true });
       if (upCreatedErr) throw upCreatedErr;
 
-      // Upcoming: meetings where user is a participant (inner join)
+      // Upcoming: meetings where user is a participant
       const { data: upJoined, error: upJoinedErr } = await this.supabase
         .from('meetings')
-        .select('*, meeting_settings(*), participants!inner(user_id)')
+        .select('*, meeting_settings(*), meeting_participants!inner(user_id)')
         .eq('status', 'scheduled')
         .gte('scheduled_at', nowIso)
-        .eq('participants.user_id', userId)
+        .eq('meeting_participants.user_id', userId)
         .order('scheduled_at', { ascending: true });
       if (upJoinedErr) throw upJoinedErr;
       const upcoming = dedupeById([...(upCreated || []), ...(upJoined || [])]);
@@ -49,9 +79,9 @@ export class MeetingService {
       // Ongoing: participant
       const { data: onJoined, error: onJoinedErr } = await this.supabase
         .from('meetings')
-        .select('*, meeting_settings(*), participants!inner(user_id)')
+        .select('*, meeting_settings(*), meeting_participants!inner(user_id)')
         .eq('status', 'ongoing')
-        .eq('participants.user_id', userId)
+        .eq('meeting_participants.user_id', userId)
         .order('started_at', { ascending: false });
       if (onJoinedErr) throw onJoinedErr;
       const ongoing = dedupeById([...(onCreated || []), ...(onJoined || [])]);
@@ -72,17 +102,17 @@ export class MeetingService {
 
       const { data: coJoined, error: coJoinedErr } = await this.supabase
         .from('meetings')
-        .select('*, meeting_settings(*), participants!inner(user_id)')
+        .select('*, meeting_settings(*), meeting_participants!inner(user_id)')
         .eq('status', 'completed')
         .gte('ended_at', thirtyIso)
-        .eq('participants.user_id', userId)
+        .eq('meeting_participants.user_id', userId)
         .order('ended_at', { ascending: false });
       if (coJoinedErr) throw coJoinedErr;
       const completed = dedupeById([...(coCreated || []), ...(coJoined || [])]);
 
       // Calculate statistics
       const totalMeetings = (upcoming?.length || 0) + (ongoing?.length || 0) + (completed?.length || 0);
-      const totalParticipants = 0; // optional: compute via a separate aggregate if needed
+      const totalParticipants = 0; // We can add this calculation if needed
       const totalDuration = (completed as any[])?.reduce((sum: number, meeting: any) => sum + (meeting.duration_minutes || 0), 0) || 0;
 
       return {
@@ -101,7 +131,6 @@ export class MeetingService {
 
   async createMeeting(userId: string, meetingData: CreateMeetingRequest): Promise<Meeting> {
     try {
-      const notificationService = new NotificationService(this.supabase);
       // If instant meeting (no schedule), ensure only one ongoing meeting per creator
       if (!meetingData.scheduled_at) {
         const { data: existingOngoing } = await this.supabase
@@ -114,9 +143,9 @@ export class MeetingService {
           .single();
 
         if (existingOngoing) {
-          // Ensure creator is marked present
+          // Update host status if needed
           const { data: existingParticipant } = await this.supabase
-            .from('participants')
+            .from('meeting_participants')
             .select('id')
             .eq('meeting_id', existingOngoing.id)
             .eq('user_id', userId)
@@ -124,19 +153,28 @@ export class MeetingService {
 
           if (existingParticipant) {
             await this.supabase
-              .from('participants')
+              .from('meeting_participants')
               .update({ is_present: true, joined_at: new Date().toISOString() })
               .eq('meeting_id', existingOngoing.id)
               .eq('user_id', userId);
           } else {
             await this.supabase
-              .from('participants')
-              .insert({ meeting_id: existingOngoing.id, user_id: userId, role: 'host', is_present: true, joined_at: new Date().toISOString() });
+              .from('meeting_participants')
+              .insert({
+                meeting_id: existingOngoing.id,
+                user_id: userId,
+                role: 'host',
+                is_present: true,
+                joined_at: new Date().toISOString()
+              });
           }
 
-          return existingOngoing as unknown as Meeting;
+          return existingOngoing as Meeting;
         }
       }
+
+      // Generate a unique meeting code
+      const meetingCode = Math.random().toString(36).substring(2, 15);
 
       // Create the meeting
       const { data: meeting, error: meetingError } = await this.supabase
@@ -145,15 +183,17 @@ export class MeetingService {
           title: meetingData.title,
           description: meetingData.description,
           created_by: userId,
+          meeting_code: meetingCode,
           scheduled_at: meetingData.scheduled_at,
           status: meetingData.scheduled_at ? 'scheduled' : 'ongoing',
           max_participants: meetingData.max_participants || 100,
-          is_recurring: meetingData.is_recurring || false,
-          recurrence_pattern: meetingData.recurrence_pattern,
+          started_at: !meetingData.scheduled_at ? new Date().toISOString() : null,
+          duration_minutes: meetingData.duration_minutes || 60,
           timezone: meetingData.timezone || 'UTC',
-          started_at: !meetingData.scheduled_at ? new Date().toISOString() : null
+          is_recurring: meetingData.is_recurring || false,
+          recurrence_pattern: meetingData.recurrence_pattern
         })
-        .select()
+        .select('*')
         .single();
 
       if (meetingError) throw meetingError;
@@ -181,29 +221,70 @@ export class MeetingService {
 
       if (settingsError) throw settingsError;
 
-      // Add creator as host participant
-      const { error: participantError } = await this.supabase
-        .from('participants')
-        .insert({
-          meeting_id: meeting.id,
-          user_id: userId,
-          role: 'host',
-          is_present: !meetingData.scheduled_at // Present if starting immediately
-        });
+      // Get user info for notifications
+      const { data: userProfile } = await this.supabase
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', userId)
+        .single();
 
-      if (participantError) throw participantError;
+      // Add participants and send invitations
+      try {
+        // Add the host as a participant
+        const { error: hostError } = await this.supabase
+          .from('meeting_participants')
+          .insert([{
+            meeting_id: meeting.id,
+            user_id: userId,
+            email: userProfile?.email,
+            role: 'host',
+            status: 'accepted',
+            is_present: !meetingData.scheduled_at
+          }]);
 
-      // Send invitations if provided
-      if (meetingData.invitations && meetingData.invitations.length > 0) {
-        await this.sendInvitations(meeting.id, meetingData.invitations, userId);
+        if (hostError) throw hostError;
+
+        // Add other participants if they exist
+        if (meetingData.participants?.length > 0) {
+          const { error: participantsError } = await this.supabase
+            .from('meeting_participants')
+            .insert(
+              meetingData.participants.map(email => ({
+                meeting_id: meeting.id,
+                email: email,
+                role: 'participant',
+                status: 'pending',
+                is_present: false
+              }))
+            );
+
+          if (participantsError) throw participantsError;
+
+          // Initialize notification service
+          const notificationService = new NotificationService(this.supabase);
+
+          // Send invitations and set up notifications
+          await Promise.all([
+            // Send email invitations
+            ...meetingData.participants.map(email => 
+              notificationService.sendMeetingInvitation({
+                meetingId: meeting.id,
+                title: meeting.title,
+                scheduledAt: meeting.scheduled_at,
+                recipientEmail: email,
+                hostName: userProfile?.full_name || 'Meeting Host'
+              })
+            ),
+            // Set up reminder notifications if it's a scheduled meeting
+            meeting.scheduled_at ? notificationService.createMeetingReminder(meeting) : null
+          ].filter(Boolean));
+        }
+
+        return meeting;
+      } catch (error) {
+        console.error('Error in meeting setup:', error);
+        throw error;
       }
-
-      // Schedule reminder notifications if scheduled meeting
-      if (meeting.status === 'scheduled') {
-        await notificationService.createMeetingReminder(meeting);
-      }
-
-      return meeting;
     } catch (error) {
       console.error('Error creating meeting:', error);
       throw error;
@@ -213,6 +294,8 @@ export class MeetingService {
   async startMeeting(meetingId: string, userId: string): Promise<Meeting> {
     try {
       const notificationService = new NotificationService(this.supabase);
+
+      // Get meeting with settings
       const { data: meeting, error } = await this.supabase
         .from('meetings')
         .update({
@@ -221,19 +304,23 @@ export class MeetingService {
         })
         .eq('id', meetingId)
         .eq('created_by', userId)
-        .select()
+        .select('*, meeting_settings(*)')
         .single();
 
       if (error) throw error;
 
-      // Update participant status
+      // Mark host as present
       await this.supabase
-        .from('participants')
-        .update({ is_present: true, joined_at: new Date().toISOString() })
+        .from('meeting_participants')
+        .update({ 
+          is_present: true, 
+          joined_at: new Date().toISOString(),
+          status: 'accepted'
+        })
         .eq('meeting_id', meetingId)
         .eq('user_id', userId);
 
-      // Notify non-present participants the meeting started
+      // Notify absent participants
       await notificationService.sendMeetingStartedNotifications(meeting);
 
       return meeting;
@@ -245,7 +332,6 @@ export class MeetingService {
 
   async endMeeting(meetingId: string, userId: string): Promise<Meeting> {
     try {
-      const notificationService = new NotificationService(this.supabase);
       const now = new Date().toISOString();
       
       // Get meeting start time to calculate duration
@@ -278,12 +364,12 @@ export class MeetingService {
 
       // Update all participants as left
       await this.supabase
-        .from('participants')
+        .from('meeting_participants')
         .update({ is_present: false, left_at: now })
         .eq('meeting_id', meetingId);
 
-      // Notify participants that meeting ended
-      await notificationService.sendMeetingEndedNotifications(meeting);
+      // Send summary notifications if needed
+      // You can add meeting summary notifications here
 
       return meeting;
     } catch (error) {
@@ -312,7 +398,7 @@ export class MeetingService {
     try {
       // Check if user is already a participant
       const { data: existingParticipant } = await this.supabase
-        .from('participants')
+        .from('meeting_participants')
         .select('id')
         .eq('meeting_id', meetingId)
         .eq('user_id', userId)
@@ -321,7 +407,7 @@ export class MeetingService {
       if (existingParticipant) {
         // Update existing participant
         await this.supabase
-          .from('participants')
+          .from('meeting_participants')
           .update({
             is_present: true,
             joined_at: new Date().toISOString()
@@ -331,11 +417,12 @@ export class MeetingService {
       } else {
         // Add new participant
         await this.supabase
-          .from('participants')
+          .from('meeting_participants')
           .insert({
             meeting_id: meetingId,
             user_id: userId,
-            role: 'attendee',
+            role: 'participant',
+            status: 'accepted',
             is_present: true,
             joined_at: new Date().toISOString()
           });
@@ -349,7 +436,7 @@ export class MeetingService {
   async leaveMeeting(meetingId: string, userId: string): Promise<void> {
     try {
       await this.supabase
-        .from('participants')
+        .from('meeting_participants')
         .update({
           is_present: false,
           left_at: new Date().toISOString()
@@ -369,52 +456,44 @@ export class MeetingService {
         .select(`
           *,
           meeting_settings(*),
-          participants(*)
+          meeting_participants(*)
         `)
         .eq('meeting_code', code)
         .single();
 
       if (error) {
-        if (error.code === 'PGRST116') return null; // Not found
-        throw error;
+        console.error('Error fetching meeting by code:', error);
+        return null;
       }
 
       return meeting;
     } catch (error) {
-      console.error('Error getting meeting by code:', error);
-      throw error;
+      console.error('Error fetching meeting:', error);
+      return null;
     }
   }
 
-  private async sendInvitations(meetingId: string, emails: string[], invitedBy: string): Promise<void> {
+  async getMeetingById(id: string): Promise<Meeting | null> {
     try {
-      const invitations = emails.map(email => ({
-        meeting_id: meetingId,
-        email,
-        invited_by: invitedBy,
-        status: 'pending' as const,
-        token: this.generateInvitationToken(),
-        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days
-      }));
+      const { data: meeting, error } = await this.supabase
+        .from('meetings')
+        .select(`
+          *,
+          meeting_settings(*),
+          meeting_participants(*)
+        `)
+        .eq('id', id)
+        .single();
 
-      const { error } = await this.supabase
-        .from('meeting_invitations')
-        .insert(invitations);
+      if (error) {
+        console.error('Error fetching meeting by id:', error);
+        return null;
+      }
 
-      if (error) throw error;
-
-      // TODO: Send actual emails using your email service
-      // For now, we'll just log the invitations
-      console.log('Invitations created:', invitations);
+      return meeting;
     } catch (error) {
-      console.error('Error sending invitations:', error);
-      throw error;
+      console.error('Error fetching meeting:', error);
+      return null;
     }
-  }
-
-  private generateInvitationToken(): string {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   }
 }
-
-// Intentionally no default instance export; construct with a Supabase client where needed

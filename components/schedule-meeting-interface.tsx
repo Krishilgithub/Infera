@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Calendar as DateCalendar } from "@/components/ui/calendar";
+import { TimePicker } from "@/components/ui/time-picker";
 import {
 	Calendar,
 	Clock,
@@ -33,7 +35,7 @@ interface ScheduledMeeting {
 
 export default function ScheduleMeetingInterface() {
 	const [meetingTitle, setMeetingTitle] = useState("");
-	const [meetingDate, setMeetingDate] = useState("");
+	const [meetingDate, setMeetingDate] = useState<Date | undefined>(undefined);
 	const [meetingTime, setMeetingTime] = useState("");
 	const [duration, setDuration] = useState(60);
 	const [description, setDescription] = useState("");
@@ -71,15 +73,43 @@ export default function ScheduleMeetingInterface() {
 		setIsCreating(true);
 
 		try {
-			const code = await createMeeting(meetingTitle);
+			// Combine date and time into ISO string
+			const dateStr = meetingDate ? meetingDate.toISOString().split('T')[0] : "";
+			const scheduledDateTime = new Date(`${dateStr}T${meetingTime}`);
+
+			const response = await fetch('/api/meetings', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					title: meetingTitle,
+					description: description,
+					scheduled_at: scheduledDateTime.toISOString(),
+					invitations: participants.map(email => ({ email })),
+					settings: {
+						allow_recording: true,
+						allow_transcript: true,
+						allow_chat: true,
+					}
+				}),
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				throw new Error(error.message || 'Failed to schedule meeting');
+			}
+
+			const data = await response.json();
+
 			const scheduledMeeting: ScheduledMeeting = {
-				id: `scheduled_${Date.now()}`,
+				id: data.id,
 				title: meetingTitle,
-				date: meetingDate,
+				date: meetingDate ? meetingDate.toISOString().split('T')[0] : "",
 				time: meetingTime,
 				duration,
 				participants,
-				meetingCode: code,
+				meetingCode: data.meeting_code,
 				description,
 			};
 
@@ -99,8 +129,20 @@ export default function ScheduleMeetingInterface() {
 		}
 	};
 
-	const startScheduledMeeting = () => {
-		router.push("/dashboard/live");
+	const startScheduledMeeting = async () => {
+		if (!scheduledMeeting?.meetingCode) return;
+
+		try {
+			// Join the meeting with the generated code
+			const success = await createMeeting(scheduledMeeting.title);
+			if (success) {
+				router.push("/dashboard/live");
+			} else {
+				console.error("Failed to start the meeting");
+			}
+		} catch (error) {
+			console.error("Error starting meeting:", error);
+		}
 	};
 
 	return (
@@ -268,20 +310,18 @@ export default function ScheduleMeetingInterface() {
 											<label className="block text-sm font-medium text-gray-700 mb-2">
 												Date *
 											</label>
-											<Input
-												type="date"
-												value={meetingDate}
-												onChange={(e) => setMeetingDate(e.target.value)}
+											<DateCalendar
+												selected={meetingDate}
+												onSelect={setMeetingDate}
 											/>
 										</div>
 										<div>
 											<label className="block text-sm font-medium text-gray-700 mb-2">
 												Time *
 											</label>
-											<Input
-												type="time"
+											<TimePicker
 												value={meetingTime}
-												onChange={(e) => setMeetingTime(e.target.value)}
+												onChange={setMeetingTime}
 											/>
 										</div>
 									</div>
